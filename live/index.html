@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>DETwal Live — Trading Room</title>
+    <meta
+        name="description"
+        content="DETwal Live Trading Room"
+    >
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Background -->
+    <div class="grid-background"></div>
+    <div class="ambient-glow glow-one"></div>
+    <div class="ambient-glow glow-two"></div>
+
+    <!-- LOGIN SCREEN -->
+    <main class="auth-page" id="authPage">
+
+        <div class="auth-container">
+
+            <!-- Brand -->
+            <div class="brand-area">
+                <div class="brand-mark">D</div>
+                <div class="brand-name">detwal<span>.</span></div>
+                <div class="live-badge">
+                    <span class="status-dot"></span>
+                    LIVE
+                </div>
+            </div>
+
+            <div class="auth-card">
+
+                <div class="terminal-label">
+                    <span></span>
+                    SECURE ACCESS
+                </div>
+
+                <h1>Welcome to<br><strong>DETwal Live</strong></h1>
+
+                <p class="auth-description">
+                    Access the private DETwal live trading terminal.
+                </p>
+
+                <!-- Login form -->
+                <form id="loginForm">
+
+                    <div class="input-group">
+                        <label for="email">EMAIL</label>
+
+                        <div class="input-wrapper">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+
+                            <input
+                                type="email"
+                                id="email"
+                                placeholder="you@example.com"
+                                autocomplete="email"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="password">PASSWORD</label>
+
+                        <div class="input-wrapper">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <rect x="3" y="11" width="18" height="10" rx="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+
+                            <input
+                                type="password"
+                                id="password"
+                                placeholder="Enter your password"
+                                autocomplete="current-password"
+                                required
+                            >
+
+                            <button
+                                type="button"
+                                class="password-toggle"
+                                id="passwordToggle"
+                                aria-label="Show password"
+                            >
+                                ◉
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="login-options">
+                        <button
+                            type="button"
+                            class="text-button"
+                            id="forgotPasswordBtn"
+                        >
+                            Forgot password?
+                        </button>
+                    </div>
+
+                    <button type="submit" class="primary-button" id="loginButton">
+                        <span>ENTER LIVE TERMINAL</span>
+                        <span class="button-arrow">→</span>
+                    </button>
+
+                    <div id="loginMessage" class="form-message"></div>
+
+                </form>
+
+                <div class="divider">
+                    <span></span>
+                    <p>NO ACTIVE SUBSCRIPTION?</p>
+                    <span></span>
+                </div>
+
+                <a
+                    href="https://detwal.in/subscription/"
+                    class="secondary-button"
+                >
+                    GET DETWAL SUBSCRIPTION
+                    <span>↗</span>
+                </a>
+
+            </div>
+
+            <!-- Live Room -->
+            <div class="live-room-card">
+
+                <div class="room-header">
+                    <div>
+                        <div class="room-label">
+                            <span class="pulse-dot"></span>
+                            LIVE TRADING ROOM
+                        </div>
+
+                        <h2>Join the live session</h2>
+                    </div>
+
+                    <div class="room-icon">
+                        ↗
+                    </div>
+                </div>
+
+                <p id="roomStatus">
+                    Link will be available 30 minutes before a red folder news only.
+                </p>
+
+                <a
+                    href="#"
+                    id="liveRoomLink"
+                    class="room-button disabled"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <span>CLICK HERE FOR LIVE TRADING ROOM</span>
+                    <span>→</span>
+                </a>
+
+                <div class="room-footer">
+                    <span>RED FOLDER EVENTS</span>
+                    <span>•</span>
+                    <span>LIVE ACCESS</span>
+                </div>
+
+            </div>
+
+            <div class="security-note">
+                <span>⌁</span>
+                PRIVATE MEMBER AREA · AUTHENTICATED ACCESS ONLY
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- FORGOT PASSWORD MODAL -->
+    <div class="modal-overlay" id="forgotModal">
+
+        <div class="modal-card">
+
+            <button
+                type="button"
+                class="modal-close"
+                id="closeForgotModal"
+            >
+                ×
+            </button>
+
+            <div class="terminal-label">
+                <span></span>
+                ACCOUNT RECOVERY
+            </div>
+
+            <h2>Reset your access</h2>
+
+            <p>
+                Submit your account details. Your request will be reviewed
+                before your new access is activated.
+            </p>
+
+            <form id="forgotForm">
+
+                <div class="input-group">
+                    <label for="forgotName">NAME</label>
+
+                    <div class="input-wrapper">
+                        <input
+                            type="text"
+                            id="forgotName"
+                            placeholder="Your full name"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="forgotEmail">EMAIL</label>
+
+                    <div class="input-wrapper">
+                        <input
+                            type="email"
+                            id="forgotEmail"
+                            placeholder="Your registered email"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="newPassword">NEW PASSWORD</label>
+
+                    <div class="input-wrapper">
+                        <input
+                            type="password"
+                            id="newPassword"
+                            placeholder="Create a new password"
+                            minlength="8"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="confirmPassword">CONFIRM PASSWORD</label>
+
+                    <div class="input-wrapper">
+                        <input
+                            type="password"
+                            id="confirmPassword"
+                            placeholder="Confirm your password"
+                            minlength="8"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <button
+                    type="submit"
+                    class="primary-button"
+                    id="forgotSubmitButton"
+                >
+                    <span>SUBMIT REQUEST</span>
+                    <span>→</span>
+                </button>
+
+                <div id="forgotMessage" class="form-message"></div>
+
+            </form>
+
+            <div class="recovery-warning">
+                Account recovery requests are manually reviewed for security.
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- DASHBOARD PLACEHOLDER -->
+    <main class="dashboard-page" id="dashboardPage">
+
+        <header class="topbar">
+
+            <div class="dashboard-brand">
+                <div class="brand-mark small">D</div>
+                <div class="brand-name">detwal<span>.</span></div>
+
+                <div class="top-live">
+                    <span class="status-dot"></span>
+                    LIVE TERMINAL
+                </div>
+            </div>
+
+            <div class="account-area">
+
+                <div class="account-status">
+                    <span class="status-dot"></span>
+                    ACTIVE
+                </div>
+
+                <button class="account-button" id="accountButton">
+                    <span id="accountInitial">D</span>
+                    <span id="accountName">Account</span>
+                    <span>⌄</span>
+                </button>
+
+                <div class="account-menu" id="accountMenu">
+                    <div class="account-email" id="accountEmail"></div>
+
+                    <button id="logoutButton">
+                        Logout
+                    </button>
+                </div>
+
+            </div>
+
+        </header>
+
+        <section class="dashboard-content">
+
+            <div class="dashboard-heading">
+                <div>
+                    <div class="terminal-label">
+                        <span></span>
+                        DETWAL LIVE
+                    </div>
+
+                    <h1>Trading Terminal</h1>
+
+                    <p>
+                        Real-time access for active DETwal subscribers.
+                    </p>
+                </div>
+
+                <div class="market-status">
+                    <span class="status-dot"></span>
+                    MARKET CONNECTION ACTIVE
+                </div>
+            </div>
+
+
+            <div class="dashboard-grid">
+
+                <div class="terminal-card main-trade-card">
+
+                    <div class="card-top">
+                        <span>XAUUSD</span>
+                        <span class="live-tag">LIVE</span>
+                    </div>
+
+                    <div class="instrument">
+                        GOLD
+                    </div>
+
+                    <div class="price-placeholder">
+                        —
+                    </div>
+
+                    <div class="trade-message">
+                        Waiting for live setup...
+                    </div>
+
+                </div>
+
+
+                <div class="terminal-card">
+
+                    <div class="card-title">
+                        CURRENT EVENT
+                    </div>
+
+                    <div class="event-name">
+                        No active event
+                    </div>
+
+                    <div class="event-status">
+                        Monitoring red folder news
+                    </div>
+
+                </div>
+
+
+                <div class="terminal-card">
+
+                    <div class="card-title">
+                        TRADE STATUS
+                    </div>
+
+                    <div class="trade-status">
+                        <span class="status-dot"></span>
+                        NO ACTIVE TRADE
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="terminal-card history-card">
+
+                <div class="card-header-row">
+                    <div>
+                        <div class="card-title">
+                            LIVE ACTIVITY
+                        </div>
+
+                        <h2>Trading Activity</h2>
+                    </div>
+
+                    <span class="data-status">
+                        SYSTEM READY
+                    </span>
+                </div>
+
+                <div class="empty-state">
+                    <div class="empty-icon">⌁</div>
+
+                    <h3>Waiting for live activity</h3>
+
+                    <p>
+                        Trading information will appear here when an active
+                        DETwal setup is published.
+                    </p>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script src="script.js"></script>
+
+</body>
+</html>
