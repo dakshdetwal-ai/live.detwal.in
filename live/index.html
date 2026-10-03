@@ -1,1 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DETWAL — Trade. Learn. Grow.</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{
+  --bg:#0b0e14; --bg2:#10141d; --card:#141a24; --card2:#1a2230;
+  --border:#232c3b; --text:#e6eaf0; --muted:#8a93a6;
+  --green:#00d084; --red:#ff4d5e; --blue:#3b82f6; --gold:#f5b942;
+  --grad: linear-gradient(135deg,#3b82f6,#00d084);
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,Arial,sans-serif;}
+body{background:var(--bg);color:var(--text);line-height:1.5;}
+a{text-decoration:none;color:inherit;}
+ul{list-style:none;}
+img,svg{max-width:100%;}
 
+/* NAV */
+nav{position:sticky;top:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;
+  padding:14px 28px;background:rgba(11,14,20,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);}
+.logo{font-size:22px;font-weight:800;letter-spacing:1px;}
+.logo span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.nav-links{display:flex;gap:26px;align-items:center;}
+.nav-links a{font-weight:600;color:var(--muted);padding:6px 2px;border-bottom:2px solid transparent;transition:.2s;cursor:pointer;}
+.nav-links a.active,.nav-links a:hover{color:var(--text);border-color:var(--blue);}
+.nav-right{display:flex;gap:12px;align-items:center;}
+.btn{padding:9px 18px;border-radius:8px;border:none;font-weight:700;cursor:pointer;font-size:14px;transition:.2s;}
+.btn-primary{background:var(--grad);color:#02101a;}
+.btn-primary:hover{filter:brightness(1.1);transform:translateY(-1px);}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text);}
+.btn-outline:hover{border-color:var(--blue);}
+.btn-ghost{background:var(--card2);color:var(--text);}
+.hamburger{display:none;font-size:22px;cursor:pointer;background:none;border:none;color:var(--text);}
+#userChip{display:none;align-items:center;gap:8px;background:var(--card2);padding:6px 12px;border-radius:20px;font-weight:600;font-size:13px;}
+#userChip .dot{width:8px;height:8px;background:var(--green);border-radius:50%;}
+
+/* PAGES */
+.page{display:none;max-width:1200px;margin:0 auto;padding:36px 24px 80px;}
+.page.active{display:block;animation:fade .35s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* HERO */
+.hero{text-align:center;padding:70px 20px 50px;}
+.hero h1{font-size:44px;font-weight:800;margin-bottom:16px;}
+.hero h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.hero p{color:var(--muted);font-size:17px;max-width:620px;margin:0 auto 30px;}
+.hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin:50px 0;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;text-align:center;}
+.stat-card h3{font-size:26px;color:var(--blue);}
+.stat-card p{color:var(--muted);font-size:13px;margin-top:6px;}
+
+.features{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+.feature-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:26px;transition:.25s;cursor:pointer;}
+.feature-card:hover{transform:translateY(-6px);border-color:var(--blue);box-shadow:0 10px 30px rgba(59,130,246,.15);}
+.feature-card .ico{font-size:30px;margin-bottom:14px;}
+.feature-card h4{margin-bottom:8px;}
+.feature-card p{color:var(--muted);font-size:13.5px;}
+
+/* SECTION HEAD */
+.sec-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+.sec-head h2{font-size:26px;}
+.sec-head p.sub{color:var(--muted);font-size:14px;margin-top:4px;}
+
+/* CARDS GRID generic */
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+
+/* JOURNAL */
+.journal-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+.jstat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;}
+.jstat h4{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.jstat .val{font-size:24px;font-weight:800;margin-top:6px;}
+.pos{color:var(--green);} .neg{color:var(--red);}
+
+.panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:24px;}
+.form-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:14px;}
+input,select,textarea{width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);
+  padding:10px 12px;border-radius:8px;font-size:14px;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);}
+label{font-size:12px;color:var(--muted);margin-bottom:5px;display:block;}
+textarea{resize:vertical;min-height:70px;}
+
+table{width:100%;border-collapse:collapse;font-size:13.5px;}
+th,td{padding:12px 10px;text-align:left;border-bottom:1px solid var(--border);}
+th{color:var(--muted);font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:.5px;}
+tr:hover td{background:rgba(255,255,255,.02);}
+.badge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+.badge-buy{background:rgba(0,208,132,.15);color:var(--green);}
+.badge-sell{background:rgba(255,77,94,.15);color:var(--red);}
+.icon-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;padding:4px 6px;}
+.icon-btn:hover{color:var(--red);}
+#equityChartWrap{height:260px;}
+
+/* STRATEGIES */
+.filter-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px;}
+.chip{padding:7px 16px;border-radius:20px;background:var(--card2);border:1px solid var(--border);cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);}
+.chip.active{background:var(--grad);color:#02101a;border:none;}
+.strategy-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:10px;transition:.2s;}
+.strategy-card:hover{border-color:var(--blue);}
+.strategy-top{display:flex;justify-content:space-between;align-items:flex-start;}
+.strategy-top h4{font-size:17px;}
+.cat-tag{font-size:11px;background:var(--card2);padding:3px 10px;border-radius:20px;color:var(--gold);}
+.price{font-size:20px;font-weight:800;color:var(--green);}
+.price.free{color:var(--blue);}
+.rating{color:var(--gold);font-size:13px;}
+.strategy-desc{color:var(--muted);font-size:13.5px;flex:1;}
+.author{font-size:12px;color:var(--muted);}
+
+/* COMMUNITY */
+.composer{display:flex;gap:12px;margin-bottom:26px;}
+.composer textarea{flex:1;}
+.post{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px;}
+.post-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.post-author{font-weight:700;}
+.post-time{color:var(--muted);font-size:12px;}
+.post-text{font-size:14.5px;margin-bottom:12px;}
+.post-actions{display:flex;gap:18px;color:var(--muted);font-size:13px;}
+.post-actions span{cursor:pointer;display:flex;align-items:center;gap:5px;}
+.post-actions span.liked{color:var(--red);}
+
+/* NEWS */
+.news-card{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--blue);border-radius:10px;padding:18px;margin-bottom:14px;}
+.news-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px;}
+.sent{font-size:11px;font-weight:800;padding:3px 10px;border-radius:20px;}
+.sent-bull{background:rgba(0,208,132,.15);color:var(--green);}
+.sent-bear{background:rgba(255,77,94,.15);color:var(--red);}
+.sent-neutral{background:rgba(245,185,66,.15);color:var(--gold);}
+.news-title{font-weight:700;margin-bottom:6px;}
+.news-meta{color:var(--muted);font-size:12px;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:2000;}
+.hidden{display:none !important;}
+.modal-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;width:380px;max-width:90vw;position:relative;}
+.modal-box h3{margin-bottom:18px;font-size:22px;}
+.modal-close{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;}
+.switch-text{text-align:center;margin-top:14px;font-size:13px;color:var(--muted);}
+.switch-text a{color:var(--blue);font-weight:700;cursor:pointer;}
+
+/* TOAST */
+#toastContainer{position:fixed;bottom:24px;right:24px;z-index:3000;display:flex;flex-direction:column;gap:10px;}
+.toast{background:var(--card2);border:1px solid var(--border);padding:12px 18px;border-radius:10px;font-size:13.5px;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);animation:slideIn .3s ease;border-left:4px solid var(--blue);}
+.toast.success{border-left-color:var(--green);}
+.toast.error{border-left-color:var(--red);}
+@keyframes slideIn{from{opacity:0;transform:translateX(30px);}to{opacity:1;transform:translateX(0);}}
+
+footer{text-align:center;padding:30px;color:var(--muted);font-size:13px;border-top:1px solid var(--border);}
+
+@media(max-width:900px){
+  .nav-links{position:fixed;top:60px;left:0;right:0;background:var(--bg2);flex-direction:column;padding:20px;display:none;border-bottom:1px solid var(--border);}
+  .nav-links.open{display:flex;}
+  .hamburger{display:block;}
+  .stats-bar,.features,.grid4,.grid3,.journal-stats{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:560px){
+  .stats-bar,.features,.grid4,.grid3,.journal-stats{grid-template-columns:1fr;}
+  .hero h1{font-size:30px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">DE<span>TWAL</span></div>
+  <ul class="nav-links" id="navLinks">
+    <a data-page="home" class="active">Home</a>
+    <a data-page="journal">Journal</a>
+    <a data-page="strategies">Strategies Store</a>
+    <a data-page="community">Community</a>
+    <a data-page="news">News Trading</a>
+  </ul>
+  <div class="nav-right">
+    <div id="userChip"><span class="dot"></span><span id="userName"></span></div>
+    <button class="btn btn-outline" id="loginBtn" onclick="openAuth('login')">Login</button>
+    <button class="btn btn-primary" id="signupBtn" onclick="openAuth('signup')">Sign Up</button>
+    <button class="btn btn-ghost hidden" id="logoutBtn" onclick="logout()">Logout</button>
+    <button class="hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')">☰</button>
+  </div>
+</nav>
+
+<!-- HOME -->
+<section class="page active" id="home">
+  <div class="hero">
+    <h1>Master the Markets with <span>DETWAL</span></h1>
+    <p>One platform for your trading journal, proven strategies, real-time market news, and a community of serious traders. Track every trade. Learn every edge. Grow every day.</p>
+    <div class="hero-btns">
+      <button class="btn btn-primary" onclick="goTo('journal')">Start Journaling →</button>
+      <button class="btn btn-outline" onclick="goTo('strategies')">Browse Strategies</button>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-card"><h3 id="homeTrades">0</h3><p>Trades Logged</p></div>
+    <div class="stat-card"><h3 id="homeWinrate">0%</h3><p>Avg Win Rate</p></div>
+    <div class="stat-card"><h3>6+</h3><p>Verified Strategies</p></div>
+    <div class="stat-card"><h3 id="homePosts">0</h3><p>Community Posts</p></div>
+  </div>
+
+  <div class="sec-head"><h2>Everything a trader needs</h2></div>
+  <div class="features">
+    <div class="feature-card" onclick="goTo('journal')">
+      <div class="ico">📓</div><h4>Trading Journal</h4>
+      <p>Log trades, auto-calculate P&L & win rate, visualize your equity curve.</p>
+    </div>
+    <div class="feature-card" onclick="goTo('strategies')">
+      <div class="ico">🛒</div><h4>Strategies Store</h4>
+      <p>Buy or grab free, battle-tested trading strategies across markets.</p>
+    </div>
+    <div class="feature-card" onclick="goTo('community')">
+      <div class="ico">👥</div><h4>Community</h4>
+      <p>Discuss setups, share wins & losses, learn from fellow traders.</p>
+    </div>
+    <div class="feature-card" onclick="goTo('news')">
+      <div class="ico">📰</div><h4>News Trading</h4>
+      <p>Stay ahead with sentiment-tagged, high-impact market news.</p>
+    </div>
+  </div>
+</section>
+
+<!-- JOURNAL -->
+<section class="page" id="journal">
+  <div class="sec-head">
+    <div><h2>Trading Journal</h2><p class="sub">Log trades and track your performance over time</p></div>
+    <button class="btn btn-primary" onclick="toggleForm()">+ Add Trade</button>
+  </div>
+
+  <div class="journal-stats">
+    <div class="jstat"><h4>Total Trades</h4><div class="val" id="statTotal">0</div></div>
+    <div class="jstat"><h4>Win Rate</h4><div class="val" id="statWinrate">0%</div></div>
+    <div class="jstat"><h4>Total P&L</h4><div class="val" id="statPnl">₹0</div></div>
+    <div class="jstat"><h4>Avg R:R</h4><div class="val" id="statRR">0.0</div></div>
+  </div>
+
+  <div class="panel hidden" id="tradeForm">
+    <h4 style="margin-bottom:16px;">New Trade Entry</h4>
+    <div class="form-row">
+      <div><label>Symbol</label><input id="f_symbol" placeholder="e.g. NIFTY, RELIANCE"></div>
+      <div><label>Direction</label><select id="f_dir"><option>Buy</option><option>Sell</option></select></div>
+      <div><label>Entry Price</label><input id="f_entry" type="number" placeholder="0.00"></div>
+      <div><label>Exit Price</label><input id="f_exit" type="number" placeholder="0.00"></div>
+    </div>
+    <div class="form-row">
+      <div><label>Quantity</label><input id="f_qty" type="number" placeholder="1"></div>
+      <div><label>Date</label><input id="f_date" type="date"></div>
+      <div><label>Strategy Tag</label><input id="f_strategy" placeholder="e.g. Breakout"></div>
+    </div>
+    <div style="margin-bottom:14px;"><label>Notes</label><textarea id="f_notes" placeholder="What went well, what didn't..."></textarea></div>
+    <button class="btn btn-primary" onclick="addTrade()">Save Trade</button>
+  </div>
+
+  <div class="panel">
+    <h4 style="margin-bottom:14px;">Equity Curve</h4>
+    <div id="equityChartWrap"><canvas id="equityChart"></canvas></div>
+  </div>
+
+  <div class="panel">
+    <table>
+      <thead><tr><th>Date</th><th>Symbol</th><th>Dir</th><th>Entry</th><th>Exit</th><th>Qty</th><th>P&L</th><th>Strategy</th><th></th></tr></thead>
+      <tbody id="tradesTableBody"></tbody>
+    </table>
+    <p id="noTrades" style="color:var(--muted);text-align:center;padding:30px 0;">No trades yet. Add your first trade above.</p>
+  </div>
+</section>
+
+<!-- STRATEGIES -->
+<section class="page" id="strategies">
+  <div class="sec-head">
+    <div><h2>Strategies Store</h2><p class="sub">Proven strategies from experienced traders</p></div>
+    <input style="max-width:220px;" id="stratSearch" placeholder="Search strategies..." oninput="renderStrategies()">
+  </div>
+  <div class="filter-bar" id="stratFilters"></div>
+  <div class="grid3" id="strategiesGrid"></div>
+</section>
+
+<!-- COMMUNITY -->
+<section class="page" id="community">
+  <div class="sec-head"><div><h2>Community</h2><p class="sub">Share setups, wins, losses & lessons with other traders</p></div></div>
+  <div class="composer">
+    <textarea id="postInput" placeholder="Share a trade idea, win, or lesson learned..."></textarea>
+  </div>
+  <div style="text-align:right;margin-bottom:24px;"><button class="btn btn-primary" onclick="addPost()">Post</button></div>
+  <div id="postsFeed"></div>
+</section>
+
+<!-- NEWS -->
+<section class="page" id="news">
+  <div class="sec-head"><div><h2>News Trading</h2><p class="sub">Sentiment-tagged market news to trade the headlines</p></div></div>
+  <div class="filter-bar" id="newsFilters"></div>
+  <div id="newsFeed"></div>
+</section>
+
+<footer>© 2026 DETWAL. Built for traders, by traders. All trades are logged locally in your browser.</footer>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay hidden" id="authModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeAuth()">×</button>
+    <h3 id="authTitle">Login</h3>
+    <form id="authForm" onsubmit="return handleAuth(event)">
+      <div id="nameField" style="margin-bottom:14px;"><label>Full Name</label><input id="auth_name" placeholder="Your name"></div>
+      <div style="margin-bottom:14px;"><label>Email</label><input id="auth_email" type="email" required placeholder="you@email.com"></div>
+      <div style="margin-bottom:18px;"><label>Password</label><input id="auth_pass" type="password" required placeholder="••••••••"></div>
+      <button class="btn btn-primary" style="width:100%;" type="submit" id="authSubmit">Login</button>
+    </form>
+    <p class="switch-text" id="switchText">Don't have an account? <a onclick="openAuth('signup')">Sign up</a></p>
+  </div>
+</div>
+
+<div id="toastContainer"></div>
+
+<script>
+/* ---------- STORAGE HELPERS ---------- */
+const load = (k,d) => JSON.parse(localStorage.getItem(k) || JSON.stringify(d));
+const save = (k,v) => localStorage.setItem(k, JSON.stringify(v));
+
+let trades = load('detwal_trades', []);
+let user = load('detwal_user', null);
+let isLoggedIn = load('detwal_loggedin', false);
+let ownedStrategies = load('detwal_owned', []);
+let posts = load('detwal_posts', [
+  {id:1, author:"Rahul Mehta", text:"Nailed a clean breakout on BANKNIFTY today following the ORB strategy. Discipline > prediction. 📈", time:"2h ago", likes:14, likedByMe:false},
+  {id:2, author:"Ishita Verma", text:"Reminder: don't revenge trade after a loss. Close the terminal, go for a walk, come back tomorrow.", time:"5h ago", likes:27, likedByMe:false},
+  {id:3, author:"Daksh Detwal", text:"Pushed an update to the News Trading module — sentiment tagging is now live! Feedback welcome 🙌", time:"1d ago", likes:41, likedByMe:false}
+]);
+
+/* ---------- NAVIGATION ---------- */
+function goTo(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(page).classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
+  const link = [...document.querySelectorAll('.nav-links a')].find(a=>a.dataset.page===page);
+  if(link) link.classList.add('active');
+  document.getElementById('navLinks').classList.remove('open');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('.nav-links a').forEach(a=>{
+  a.addEventListener('click', ()=> goTo(a.dataset.page));
+});
+
+/* ---------- TOAST ---------- */
+function toast(msg, type=''){
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.textContent = msg;
+  document.getElementById('toastContainer').appendChild(el);
+  setTimeout(()=> el.remove(), 3000);
+}
+
+/* ---------- AUTH ---------- */
+function refreshAuthUI(){
+  if(isLoggedIn && user){
+    document.getElementById('loginBtn').classList.add('hidden');
+    document.getElementById('signupBtn').classList.add('hidden');
+    document.getElementById('logoutBtn').classList.remove('hidden');
+    document.getElementById('userChip').style.display='flex';
+    document.getElementById('userName').textContent = user.name;
+  } else {
+    document.getElementById('loginBtn').classList.remove('hidden');
+    document.getElementById('signupBtn').classList.remove('hidden');
+    document.getElementById('logoutBtn').classList.add('hidden');
+    document.getElementById('userChip').style.display='none';
+  }
+}
+function openAuth(mode){
+  document.getElementById('authModal').classList.remove('hidden');
+  const isSignup = mode==='signup';
+  document.getElementById('authTitle').textContent = isSignup ? 'Create Account' : 'Login';
+  document.getElementById('nameField').style.display = isSignup ? 'block' : 'none';
+  document.getElementById('auth_name').required = isSignup;
+  document.getElementById('authSubmit').textContent = isSignup ? 'Sign Up' : 'Login';
+  document.getElementById('authForm').dataset.mode = mode;
+  document.getElementById('switchText').innerHTML = isSignup
+    ? `Already have an account? <a onclick="openAuth('login')">Login</a>`
+    : `Don't have an account? <a onclick="openAuth('signup')">Sign up</a>`;
+}
+function closeAuth(){ document.getElementById('authModal').classList.add('hidden'); }
+function handleAuth(e){
+  e.preventDefault();
+  const mode = document.getElementById('authForm').dataset.mode;
+  const email = document.getElementById('auth_email').value.trim();
+  const pass = document.getElementById('auth_pass').value;
+  if(mode==='signup'){
+    const name = document.getElementById('auth_name').value.trim() || 'Trader';
+    user = {name, email, pass};
+    save('detwal_user', user);
+    isLoggedIn = true; save('detwal_loggedin', true);
+    toast('Account created! Welcome ' + name, 'success');
+  } else {
+    if(user && user.email===email && user.pass===pass){
+      isLoggedIn = true; save('detwal_loggedin', true);
+      toast('Welcome back, ' + user.name, 'success');
+    } else if(!user){
+      toast('No account found. Please sign up first.', 'error');
+      return false;
+    } else {
+      toast('Incorrect email or password.', 'error');
+      return false;
+    }
+  }
+  refreshAuthUI();
+  closeAuth();
+  document.getElementById('authForm').reset();
+  return false;
+}
+function logout(){
+  isLoggedIn = false; save('detwal_loggedin', false);
+  refreshAuthUI();
+  toast('Logged out successfully.');
+}
+function requireLogin(){
+  if(!isLoggedIn){ toast('Please login to continue.', 'error'); openAuth('login'); return false; }
+  return true;
+}
+
+/* ---------- JOURNAL ---------- */
+function toggleForm(){
+  if(!requireLogin()) return;
+  document.getElementById('tradeForm').classList.toggle('hidden');
+}
+function calcPnl(t){
+  const dir = t.dir==='Buy' ? 1 : -1;
+  return (t.exit - t.entry) * t.qty * dir;
+}
+function addTrade(){
+  if(!requireLogin()) return;
+  const symbol = document.getElementById('f_symbol').value.trim();
+  const dir = document.getElementById('f_dir').value;
+  const entry = parseFloat(document.getElementById('f_entry').value);
+  const exit = parseFloat(document.getElementById('f_exit').value);
+  const qty = parseFloat(document.getElementById('f_qty').value);
+  const date = document.getElementById('f_date').value || new Date().toISOString().slice(0,10);
+  const strategy = document.getElementById('f_strategy').value.trim() || '—';
+  const notes = document.getElementById('f_notes').value.trim();
+  if(!symbol || isNaN(entry) || isNaN(exit) || isNaN(qty)){
+    toast('Please fill all required fields.', 'error'); return;
+  }
+  const trade = {id:Date.now(), symbol, dir, entry, exit, qty, date, strategy, notes};
+  trades.push(trade);
+  save('detwal_trades', trades);
+  ['f_symbol','f_entry','f_exit','f_qty','f_strategy','f_notes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('tradeForm').classList.add('hidden');
+  renderJournal();
+  toast('Trade saved!', 'success');
+}
+function deleteTrade(id){
+  trades = trades.filter(t=>t.id!==id);
+  save('detwal_trades', trades);
+  renderJournal();
+  toast('Trade deleted.');
+}
+let equityChart;
+function renderJournal(){
+  const tbody = document.getElementById('tradesTableBody');
+  tbody.innerHTML = '';
+  document.getElementById('noTrades').style.display = trades.length ? 'none' : 'block';
+  let wins=0, totalPnl=0, rrSum=0;
+  const sorted = [...trades].sort((a,b)=> new Date(a.date) - new Date(b.date));
+  sorted.forEach(t=>{
+    const pnl = calcPnl(t);
+    totalPnl += pnl;
+    if(pnl>0) wins++;
+    const risk = Math.abs(t.entry - t.exit) || 1;
+    rrSum += Math.abs(pnl)/ (risk*t.qty || 1);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${t.date}</td><td>${t.symbol}</td>
+      <td><span class="badge ${t.dir==='Buy'?'badge-buy':'badge-sell'}">${t.dir}</span></td>
+      <td>${t.entry}</td><td>${t.exit}</td><td>${t.qty}</td>
+      <td class="${pnl>=0?'pos':'neg'}">₹${pnl.toFixed(2)}</td>
+      <td>${t.strategy}</td>
+      <td><button class="icon-btn" onclick="deleteTrade(${t.id})">🗑</button></td>`;
+    tbody.appendChild(tr);
+  });
+  const total = trades.length;
+  const winrate = total ? ((wins/total)*100).toFixed(1) : 0;
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statWinrate').textContent = winrate + '%';
+  const pnlEl = document.getElementById('statPnl');
+  pnlEl.textContent = '₹' + totalPnl.toFixed(2);
+  pnlEl.className = 'val ' + (totalPnl>=0?'pos':'neg');
+  document.getElementById('statRR').textContent = total ? (rrSum/total).toFixed(2) : '0.0';
+  document.getElementById('homeTrades').textContent = total;
+  document.getElementById('homeWinrate').textContent = winrate + '%';
+
+  // equity chart
+  let cum = 0;
+  const labels = sorted.map(t=>t.date);
+  const data = sorted.map(t=> cum += calcPnl(t));
+  const ctx = document.getElementById('equityChart').getContext('2d');
+  if(equityChart) equityChart.destroy();
+  equityChart = new Chart(ctx, {
+    type:'line',
+    data:{ labels: labels.length?labels:['Start'], datasets:[{
+      label:'Cumulative P&L', data: data.length?data:[0],
+      borderColor:'#00d084', backgroundColor:'rgba(0,208,132,.1)',
+      fill:true, tension:.3, pointRadius:3
+    }]},
+    options:{
+      plugins:{legend:{labels:{color:'#8a93a6'}}},
+      scales:{
+        x:{ticks:{color:'#8a93a6'}, grid:{color:'#232c3b'}},
+        y:{ticks:{color:'#8a93a6'}, grid:{color:'#232c3b'}}
+      }
+    }
+  });
+}
+
+/* ---------- STRATEGIES ---------- */
+const strategies = [
+  {id:1, name:"ORB Breakout Pro", author:"Daksh Detwal", category:"Intraday", price:1499, rating:4.8, desc:"Opening range breakout system for NIFTY & BANKNIFTY futures with strict risk rules."},
+  {id:2, name:"Swing Trend Rider", author:"Ananya Rao", category:"Swing", price:999, rating:4.6, desc:"Ride multi-day trends using EMA + volume confirmation for equities."},
+  {id:3, name:"Options Theta Decay", author:"Vikram Shah", category:"Options", price:1999, rating:4.9, desc:"Weekly options selling framework designed around theta decay & IV crush."},
+  {id:4, name:"Crypto Momentum Scalper", author:"Lena Fischer", category:"Crypto", price:1299, rating:4.5, desc:"Fast momentum scalps on high-liquidity crypto pairs, 5-15 min timeframe."},
+  {id:5, name:"Price Action Naked Chart", author:"Community", category:"Swing", price:0, rating:4.7, desc:"Free beginner-friendly price action strategy, no indicators needed."},
+  {id:6, name:"News Sentiment Scalper", author:"Daksh Detwal", category:"Scalping", price:1799, rating:4.4, desc:"Trade the first 5 minutes after high-impact news releases."},
+];
+let activeCat = 'All';
+function renderStratFilters(){
+  const cats = ['All', ...new Set(strategies.map(s=>s.category))];
+  const bar = document.getElementById('stratFilters');
+  bar.innerHTML = '';
+  cats.forEach(c=>{
+    const chip = document.createElement('div');
+    chip.className = 'chip' + (c===activeCat?' active':'');
+    chip.textContent = c;
+    chip.onclick = ()=>{ activeCat = c; renderStrategies(); };
+    bar.appendChild(chip);
+  });
+}
+function renderStrategies(){
+  renderStratFilters();
+  const search = document.getElementById('stratSearch').value.toLowerCase();
+  const grid = document.getElementById('strategiesGrid');
+  grid.innerHTML = '';
+  strategies
+    .filter(s => (activeCat==='All' || s.category===activeCat) && s.name.toLowerCase().includes(search))
+    .forEach(s=>{
+      const owned = ownedStrategies.includes(s.id);
+      const card = document.createElement('div');
+      card.className = 'strategy-card';
+      card.innerHTML = `
+        <div class="strategy-top">
+          <h4>${s.name}</h4>
+          <span class="cat-tag">${s.category}</span>
+        </div>
+        <div class="rating">★ ${s.rating}</div>
+        <p class="strategy-desc">${s.desc}</p>
+        <div class="author">by ${s.author}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+          <span class="price ${s.price===0?'free':''}">${s.price===0?'FREE':'₹'+s.price}</span>
+          <button class="btn ${owned?'btn-ghost':'btn-primary'}" onclick="buyStrategy(${s.id})" ${owned?'disabled':''}>${owned?'Owned ✓':(s.price===0?'Get Free':'Buy Now')}</button>
+        </div>`;
+      grid.appendChild(card);
+    });
+}
+function buyStrategy(id){
+  if(!requireLogin()) return;
+  if(!ownedStrategies.includes(id)){
+    ownedStrategies.push(id);
+    save('detwal_owned', ownedStrategies);
+    renderStrategies();
+    toast('Strategy added to your library!', 'success');
+  }
+}
+
+/* ---------- COMMUNITY ---------- */
+function renderPosts(){
+  const feed = document.getElementById('postsFeed');
+  feed.innerHTML = '';
+  [...posts].reverse().forEach(p=>{
+    const div = document.createElement('div');
+    div.className = 'post';
+    div.innerHTML = `
+      <div class="post-head">
+        <span class="post-author">${p.author}</span>
+        <span class="post-time">${p.time}</span>
+      </div>
+      <div class="post-text">${p.text}</div>
+      <div class="post-actions">
+        <span class="${p.likedByMe?'liked':''}" onclick="toggleLike(${p.id})">❤ ${p.likes}</span>
+        <span>💬 ${Math.floor(p.likes/3)}</span>
+        ${user && p.author===user.name ? `<span onclick="deletePost(${p.id})">🗑 Delete</span>` : ''}
+      </div>`;
+    feed.appendChild(div);
+  });
+  document.getElementById('homePosts').textContent = posts.length;
+}
+function addPost(){
+  if(!requireLogin()) return;
+  const text = document.getElementById('postInput').value.trim();
+  if(!text){ toast('Write something before posting.', 'error'); return; }
+  posts.push({id:Date.now(), author:user.name, text, time:'Just now', likes:0, likedByMe:false});
+  save('detwal_posts', posts);
+  document.getElementById('postInput').value='';
+  renderPosts();
+  toast('Posted to community!', 'success');
+}
+function toggleLike(id){
+  if(!requireLogin()) return;
+  posts = posts.map(p=>{
+    if(p.id===id){
+      p.likedByMe = !p.likedByMe;
+      p.likes += p.likedByMe ? 1 : -1;
+    }
+    return p;
+  });
+  save('detwal_posts', posts);
+  renderPosts();
+}
+function deletePost(id){
+  posts = posts.filter(p=>p.id!==id);
+  save('detwal_posts', posts);
+  renderPosts();
+  toast('Post deleted.');
+}
+
+/* ---------- NEWS ---------- */
+const newsData = [
+  {id:1, category:"RBI", sentiment:"Bullish", impact:"High", title:"RBI keeps repo rate unchanged, markets rally on policy clarity", time:"2h ago"},
+  {id:2, category:"Earnings", sentiment:"Bearish", impact:"High", title:"IT major misses Q2 revenue estimates, guidance cut spooks sector", time:"4h ago"},
+  {id:3, category:"Global Markets", sentiment:"Neutral", impact:"Medium", title:"US Fed signals data-dependent approach ahead of next meeting", time:"6h ago"},
+  {id:4, category:"Crypto", sentiment:"Bullish", impact:"Medium", title:"Bitcoin reclaims key level as ETF inflows pick up pace", time:"8h ago"},
+  {id:5, category:"Commodity", sentiment:"Bearish", impact:"Low", title:"Crude oil slips on higher-than-expected inventory build", time:"10h ago"},
+  {id:6, category:"Earnings", sentiment:"Bullish", impact:"High", title:"Private bank beats estimates on strong NII and asset quality", time:"12h ago"},
+];
+let activeNewsCat = 'All';
+function renderNewsFilters(){
+  const cats = ['All', ...new Set(newsData.map(n=>n.category))];
+  const bar = document.getElementById('newsFilters');
+  bar.innerHTML = '';
+  cats.forEach(c=>{
+    const chip = document.createElement('div');
+    chip.className = 'chip' + (c===activeNewsCat?' active':'');
+    chip.textContent = c;
+    chip.onclick = ()=>{ activeNewsCat = c; renderNews(); };
+    bar.appendChild(chip);
+  });
+}
+function renderNews(){
+  renderNewsFilters();
+  const feed = document.getElementById('newsFeed');
+  feed.innerHTML = '';
+  newsData.filter(n => activeNewsCat==='All' || n.category===activeNewsCat).forEach(n=>{
+    const sentClass = n.sentiment==='Bullish'?'sent-bull':n.sentiment==='Bearish'?'sent-bear':'sent-neutral';
+    const div = document.createElement('div');
+    div.className='news-card';
+    div.innerHTML = `
+      <div class="news-top">
+        <span class="cat-tag">${n.category}</span>
+        <span class="sent ${sentClass}">${n.sentiment}</span>
+      </div>
+      <div class="news-title">${n.title}</div>
+      <div class="news-meta">Impact: ${n.impact} • ${n.time}</div>`;
+    feed.appendChild(div);
+  });
+}
+
+/* ---------- INIT ---------- */
+refreshAuthUI();
+renderJournal();
+renderStrategies();
+renderPosts();
+renderNews();
+</script>
+</body>
+</html>
