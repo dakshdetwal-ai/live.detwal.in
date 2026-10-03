@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DETWAL — Market Intelligence for Traders</title>
+<meta name="description" content="Track market-moving economic events, market data and trading intelligence in one premium dashboard." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23050505'/%3E%3Ctext x='16' y='22' font-family='Arial' font-weight='bold' font-size='17' fill='%2300D9A5' text-anchor='middle'%3ED%3C/text%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+/* ============ THEME ============ */
+:root{
+  --bg:#050505; --bg2:#0A0A0A; --card:#101010; --card2:#151515;
+  --border:rgba(255,255,255,.08); --border2:rgba(255,255,255,.14);
+  --text:#FFFFFF; --sub:#A1A1AA; --muted:#71717A;
+  --primary:#26A69A; --bright:#00D9A5;
+  --pos:#22C55E; --neg:#EF4444; --warn:#F59E0B; --blue:#3B82F6;
+  --radius:16px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;font-size:15px;line-height:1.55;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+::selection{background:rgba(0,217,165,.3);}
+::-webkit-scrollbar{width:9px;height:9px;}
+::-webkit-scrollbar-track{background:#0a0a0a;}
+::-webkit-scrollbar-thumb{background:#262626;border-radius:6px;}
+::-webkit-scrollbar-thumb:hover{background:#333;}
+a{color:inherit;text-decoration:none;}
+button{font-family:inherit;cursor:pointer;}
+input,select,textarea{font-family:inherit;}
+
+/* ============ UTILITIES ============ */
+.container{max-width:1200px;margin:0 auto;padding:0 24px;}
+.flex{display:flex;align-items:center;}
+.between{justify-content:space-between;}
+.grid{display:grid;}
+.mono{font-variant-numeric:tabular-nums;font-feature-settings:"tnum";}
+.pos{color:var(--pos);} .neg{color:var(--neg);} .warn{color:var(--warn);}
+.muted{color:var(--muted);} .sub{color:var(--sub);}
+.hidden{display:none !important;}
+
+/* ============ COMPONENTS ============ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:11px;font-weight:600;font-size:14px;padding:11px 20px;border:1px solid transparent;transition:all .18s ease;min-height:44px;}
+.btn-primary{background:var(--bright);color:#031612;}
+.btn-primary:hover{background:#2ee8bb;transform:translateY(-1px);box-shadow:0 6px 24px rgba(0,217,165,.25);}
+.btn-secondary{background:var(--card2);color:#fff;border:1px solid var(--border2);}
+.btn-secondary:hover{border-color:rgba(255,255,255,.3);background:#1b1b1b;}
+.btn-ghost{background:transparent;color:var(--sub);}
+.btn-ghost:hover{color:#fff;background:rgba(255,255,255,.05);}
+.btn-danger{background:rgba(239,68,68,.12);color:var(--neg);border:1px solid rgba(239,68,68,.3);}
+.btn-danger:hover{background:rgba(239,68,68,.22);}
+.btn-sm{padding:7px 13px;font-size:13px;min-height:34px;border-radius:9px;}
+.btn-block{width:100%;}
+.icon-btn{width:42px;height:42px;display:inline-flex;align-items:center;justify-content:center;border-radius:11px;background:transparent;border:1px solid transparent;color:var(--sub);transition:all .18s;}
+.icon-btn:hover{background:rgba(255,255,255,.06);color:#fff;}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;transition:border-color .2s,transform .2s,box-shadow .2s;}
+.card-hover:hover{transform:translateY(-2px);border-color:var(--border2);box-shadow:0 10px 40px rgba(0,0,0,.5);}
+.glass{background:rgba(255,255,255,.03);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--border);}
+
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+.pill-high{background:rgba(239,68,68,.14);color:#f87171;border:1px solid rgba(239,68,68,.3);}
+.pill-critical{background:rgba(239,68,68,.18);color:#f87171;border:1px solid rgba(239,68,68,.45);box-shadow:0 0 14px rgba(239,68,68,.25);}
+.pill-med{background:rgba(245,158,11,.12);color:#fbbf24;border:1px solid rgba(245,158,11,.3);}
+.pill-low{background:rgba(255,255,255,.06);color:var(--sub);border:1px solid var(--border);}
+.pill-green{background:rgba(0,217,165,.1);color:var(--bright);border:1px solid rgba(0,217,165,.3);}
+.pill-blue{background:rgba(59,130,246,.12);color:#60a5fa;border:1px solid rgba(59,130,246,.3);}
+.pill-gray{background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--border);}
+
+.input,select.input,textarea.input{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:11px;color:#fff;padding:12px 14px;font-size:14px;outline:none;transition:border-color .18s;min-height:44px;}
+.input:focus{border-color:var(--primary);}
+.input::placeholder{color:var(--muted);}
+label.lbl{display:block;font-size:13px;font-weight:600;color:var(--sub);margin-bottom:7px;}
+.field{margin-bottom:16px;}
+
+.toggle{position:relative;width:44px;height:24px;background:#2a2a2a;border-radius:999px;cursor:pointer;transition:background .2s;flex-shrink:0;border:none;}
+.toggle.on{background:var(--bright);}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:transform .2s;}
+.toggle.on::after{transform:translateX(20px);}
+
+.table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius);}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:640px;}
+th{text-align:left;padding:12px 16px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border);background:var(--bg2);white-space:nowrap;}
+td{padding:13px 16px;border-bottom:1px solid var(--border);white-space:nowrap;}
+tr:last-child td{border-bottom:none;}
+tbody tr{transition:background .15s;}
+tbody tr:hover{background:rgba(255,255,255,.025);}
+
+/* ============ ANIMATIONS ============ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.95);}to{opacity:1;transform:scale(1);}}
+@keyframes slideRight{from{opacity:0;transform:translateX(24px);}to{opacity:1;transform:translateX(0);}}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.55;}}
+@keyframes barFill{from{width:0;}}
+@keyframes drawLine{from{stroke-dashoffset:600;}to{stroke-dashoffset:0;}}
+.a-up{animation:fadeUp .4s ease-out both;}
+.a-in{animation:fadeIn .4s ease-out both;}
+.a-scale{animation:scaleIn .45s cubic-bezier(.2,.8,.3,1) both;}
+.d1{animation-delay:.06s;} .d2{animation-delay:.12s;} .d3{animation-delay:.18s;} .d4{animation-delay:.24s;} .d5{animation-delay:.3s;} .d6{animation-delay:.36s;}
+.pulse{animation:pulse 1.6s ease-in-out infinite;}
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .5s ease,transform .5s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.prob-bar{height:8px;border-radius:999px;animation:barFill .9s ease-out both;}
+.spark path{stroke-dasharray:600;animation:drawLine 1.1s ease-out both;}
+
+/* ============ NAVBAR ============ */
+#navbar{position:fixed;top:0;left:0;right:0;z-index:100;transition:all .25s;padding:14px 0;}
+#navbar.scrolled{background:rgba(5,5,5,.78);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:10px 0;}
+.logo{font-weight:800;font-size:19px;letter-spacing:.09em;display:inline-flex;align-items:center;gap:7px;}
+.logo .dot{width:8px;height:8px;background:var(--bright);border-radius:50%;box-shadow:0 0 10px var(--bright);}
+.nav-links{display:flex;gap:4px;}
+.nav-links a{padding:9px 14px;border-radius:9px;color:var(--sub);font-size:14px;font-weight:500;transition:all .15s;}
+.nav-links a:hover{color:#fff;background:rgba(255,255,255,.05);}
+.hamburger{display:none;}
+#mobileMenu{position:fixed;inset:0;z-index:200;background:rgba(5,5,5,.97);backdrop-filter:blur(10px);padding:24px;display:none;flex-direction:column;}
+#mobileMenu.open{display:flex;animation:fadeIn .2s both;}
+#mobileMenu a{padding:16px;font-size:18px;font-weight:600;border-bottom:1px solid var(--border);}
+
+/* ============ HERO ============ */
+.hero{position:relative;padding:150px 0 80px;overflow:hidden;}
+.hero-glow{position:absolute;top:-180px;left:50%;transform:translateX(-50%);width:900px;height:600px;background:radial-gradient(ellipse at center,rgba(0,217,165,.1),transparent 65%);pointer-events:none;}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse at 50% 0%,#000 30%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at 50% 0%,#000 30%,transparent 75%);pointer-events:none;}
+.hero h1{font-size:clamp(36px,6vw,64px);font-weight:800;line-height:1.1;letter-spacing:-.02em;}
+.hero .grad{background:linear-gradient(90deg,var(--bright),#6ee7c8);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.terminal{background:rgba(13,13,13,.92);border:1px solid var(--border2);border-radius:20px;box-shadow:0 30px 90px rgba(0,0,0,.65),0 0 60px rgba(0,217,165,.06);overflow:hidden;}
+.term-head{display:flex;align-items:center;gap:7px;padding:12px 18px;border-bottom:1px solid var(--border);background:#0b0b0b;}
+.term-dot{width:10px;height:10px;border-radius:50%;}
+
+/* ============ DASHBOARD LAYOUT ============ */
+.shell{display:flex;min-height:100vh;}
+.sidebar{width:248px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;z-index:90;transition:transform .25s ease;}
+.sidebar .s-links{flex:1;padding:10px 12px;overflow-y:auto;}
+.s-link{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:11px;color:var(--sub);font-size:14px;font-weight:500;margin-bottom:2px;transition:all .15s;cursor:pointer;border:1px solid transparent;}
+.s-link:hover{color:#fff;background:rgba(255,255,255,.04);}
+.s-link.active{color:var(--bright);background:rgba(0,217,165,.08);border-color:rgba(0,217,165,.18);}
+.main{flex:1;margin-left:248px;min-width:0;}
+.topbar{position:sticky;top:0;z-index:80;background:rgba(5,5,5,.8);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:13px 26px;display:flex;align-items:center;justify-content:space-between;gap:14px;}
+.page-pad{padding:26px;max-width:1300px;}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:85;display:none;}
+@media(max-width:980px){
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-left:0;}
+  .overlay.show{display:block;animation:fadeIn .2s both;}
+}
+
+/* ============ MODAL / TOAST / DROPDOWN ============ */
+#modalRoot{position:fixed;inset:0;z-index:300;display:none;align-items:center;justify-content:center;padding:18px;}
+#modalRoot.open{display:flex;}
+#modalRoot .backdrop{position:absolute;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);animation:fadeIn .2s both;}
+#modalRoot .modal{position:relative;background:var(--card2);border:1px solid var(--border2);border-radius:18px;max-width:480px;width:100%;max-height:88vh;overflow-y:auto;padding:26px;animation:scaleIn .25s cubic-bezier(.2,.8,.3,1) both;}
+#toastRoot{position:fixed;bottom:22px;right:22px;z-index:400;display:flex;flex-direction:column;gap:10px;max-width:92vw;}
+.toast{display:flex;align-items:center;gap:10px;background:var(--card2);border:1px solid var(--border2);border-radius:13px;padding:13px 17px;font-size:14px;font-weight:500;box-shadow:0 10px 40px rgba(0,0,0,.6);animation:slideRight .25s ease-out both;min-width:260px;}
+.dropdown{position:absolute;top:52px;right:0;width:min(360px,calc(100vw - 32px));background:var(--card2);border:1px solid var(--border2);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.7);z-index:150;animation:scaleIn .18s ease-out both;transform-origin:top right;overflow:hidden;}
+
+/* ============ SEARCH PALETTE ============ */
+#searchRoot{position:fixed;inset:0;z-index:350;display:none;justify-content:center;padding:14vh 18px 18px;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);}
+#searchRoot.open{display:flex;animation:fadeIn .15s both;}
+#searchBox{width:100%;max-width:560px;height:fit-content;background:var(--card2);border:1px solid var(--border2);border-radius:16px;overflow:hidden;animation:scaleIn .2s both;}
+.sr-item{display:flex;align-items:center;gap:12px;padding:12px 18px;cursor:pointer;font-size:14px;border-bottom:1px solid var(--border);}
+.sr-item:hover{background:rgba(255,255,255,.05);}
+
+/* ============ MISC ============ */
+.demo-badge{position:fixed;bottom:18px;left:18px;z-index:250;background:rgba(0,217,165,.1);border:1px solid rgba(0,217,165,.35);color:var(--bright);font-size:11px;font-weight:700;letter-spacing:.1em;padding:6px 12px;border-radius:999px;backdrop-filter:blur(8px);}
+.section{padding:84px 0;}
+.sec-title{font-size:clamp(26px,4vw,38px);font-weight:800;letter-spacing:-.01em;}
+.feature-ico{width:46px;height:46px;border-radius:13px;background:rgba(0,217,165,.09);border:1px solid rgba(0,217,165,.2);display:flex;align-items:center;justify-content:center;color:var(--bright);margin-bottom:16px;}
+.faq-q{width:100%;background:none;border:none;color:#fff;font-size:16px;font-weight:600;text-align:left;padding:19px 0;display:flex;justify-content:space-between;align-items:center;gap:12px;}
+.faq-a{color:var(--sub);padding-bottom:19px;display:none;font-size:14.5px;}
+.faq-item{border-bottom:1px solid var(--border);}
+.faq-item.open .faq-a{display:block;animation:fadeUp .25s both;}
+.stat-num{font-size:26px;font-weight:800;letter-spacing:-.01em;}
+.price-num{font-size:42px;font-weight:800;}
+.tab-btn{padding:8px 14px;border-radius:9px;border:1px solid var(--border);background:transparent;color:var(--sub);font-size:13px;font-weight:600;transition:all .15s;}
+.tab-btn.active{background:rgba(0,217,165,.1);border-color:rgba(0,217,165,.35);color:var(--bright);}
+.tf-btn{padding:6px 12px;border-radius:8px;border:none;background:transparent;color:var(--muted);font-size:12.5px;font-weight:600;transition:all .15s;}
+.tf-btn.active{background:rgba(0,217,165,.12);color:var(--bright);}
+.unread-dot{position:absolute;top:9px;right:9px;width:8px;height:8px;background:var(--neg);border-radius:50%;border:2px solid var(--bg);}
+footer{border-top:1px solid var(--border);padding:56px 0 34px;background:var(--bg2);}
+footer a{color:var(--muted);font-size:14px;display:block;margin-bottom:10px;transition:color .15s;}
+footer a:hover{color:#fff;}
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;}
+.notif-item{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;gap:12px;cursor:pointer;transition:background .15s;}
+.notif-item:hover{background:rgba(255,255,255,.03);}
+.notif-item.unread{background:rgba(0,217,165,.04);}
+.empty{text-align:center;padding:52px 20px;color:var(--muted);}
+@media(max-width:880px){
+  .nav-links,.nav-cta{display:none;}
+  .hamburger{display:inline-flex;}
+  .page-pad{padding:18px 14px;}
+  .topbar{padding:12px 14px;}
+  .hero{padding:118px 0 56px;}
+  .section{padding:56px 0;}
+}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+.dash-main{display:grid;grid-template-columns:1.7fr 1fr;gap:18px;}
+@media(max-width:1100px){.g4{grid-template-columns:1fr 1fr;}}
+@media(max-width:760px){.g2,.g3,.g4,.dash-main{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modalRoot"><div class="backdrop" onclick="Modal.close()"></div><div class="modal" id="modalContent"></div></div>
+<div id="toastRoot"></div>
+<div id="searchRoot"><div id="searchBox">
+  <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;">
+    <span id="srIcon"></span><input id="searchInput" class="input" style="border:none;background:transparent;min-height:auto;padding:4px;" placeholder="Search news, markets, pages…" />
+    <span class="pill pill-gray">ESC</span>
+  </div>
+  <div id="searchResults" style="max-height:340px;overflow-y:auto;"></div>
+</div></div>
+<div class="demo-badge">● DEMO MODE</div>
+
+<script>
+/* ================================================================
+   ICONS (inline SVG)
+================================================================ */
+const I = (name, s=18) => {
+  const P = {
+    up:'M23 6l-9.5 9.5-5-5L1 18M17 6h6v6',
+    down:'M23 18l-9.5-9.5-5 5L1 6M17 18h6v-6',
+    calendar:'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z',
+    bell:'M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0',
+    user:'M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M16 7a4 4 0 11-8 0 4 4 0 018 0z',
+    settings:'M12 15a3 3 0 100-6 3 3 0 000 6z M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z',
+    search:'M21 21l-4.35-4.35M19 11a8 8 0 11-16 0 8 8 0 0116 0z',
+    menu:'M3 12h18M3 6h18M3 18h18',
+    x:'M18 6L6 18M6 6l12 12',
+    clock:'M12 22a10 10 0 100-20 10 10 0 000 20z M12 6v6l4 2',
+    globe:'M12 22a10 10 0 100-20 10 10 0 000 20z M2 12h20 M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z',
+    news:'M4 22h16a2 2 0 002-2V4a2 2 0 00-2-2H8a2 2 0 00-2 2v16a2 2 0 01-2 2zm0 0a2 2 0 01-2-2v-9c0-1.1.9-2 2-2h2 M18 14h-8 M15 18h-5 M10 6h8v4h-8V6z',
+    shield:'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
+    card:'M1 10h22M3 5h18a2 2 0 012 2v10a2 2 0 01-2 2H3a2 2 0 01-2-2V7a2 2 0 012-2z',
+    chart:'M3 3v18h18 M18 17V9 M13 17V5 M8 17v-3',
+    activity:'M22 12h-4l-3 9L9 3l-3 9H2',
+    logout:'M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4 M16 17l5-5-5-5 M21 12H9',
+    home:'M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z M9 22V12h6v10',
+    star:'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z',
+    check:'M20 6L9 17l-5-5',
+    alert:'M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z M12 9v4 M12 17h.01',
+    chevD:'M6 9l6 6 6-6',
+    zap:'M13 2L3 14h9l-1 8 10-12h-9l1-8z',
+    mail:'M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z M22 6l-10 7L2 6',
+    plus:'M12 5v14 M5 12h14',
+    edit:'M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7 M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z',
+    trash:'M3 6h18 M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2 M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6 M10 11v6 M14 11v6',
+    eye:'M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z M12 15a3 3 0 100-6 3 3 0 000 6z',
+    tag:'M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z M7 7h.01',
+    arrowR:'M5 12h14 M12 5l7 7-7 7',
+    help:'M12 22a10 10 0 100-20 10 10 0 000 20z M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3 M12 17h.01'
+  };
+  return '<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+P[name].split(' M').map((d,i)=>'<path d="'+(i?'M':'')+d+'"/>').join('')+'</svg>';
+};
+
+/* ================================================================
+   MOCK DATA / DB (localStorage persisted)
+================================================================ */
+const NOW = Date.now();
+const min = m => NOW + m*60000;
+const SEED_NEWS = [
+ {id:'nfp',title:'US Nonfarm Payrolls',country:'US',currency:'USD',impact:'HIGH',ts:min(134),previous:'175K',forecast:'180K',actual:null,markets:['XAUUSD','DXY','US30','EURUSD'],bull:74,bear:26,neutral:0,desc:'Nonfarm Payrolls measures the change in employed people in the US, excluding farming. One of the most market-moving releases for gold and the dollar.',hist:'In recent simulated observations, stronger-than-forecast NFP prints were followed by short-term USD strength and XAUUSD volatility spikes. Demo context only.'},
+ {id:'ahe',title:'Average Hourly Earnings m/m',country:'US',currency:'USD',impact:'HIGH',ts:min(134),previous:'0.3%',forecast:'0.3%',actual:null,markets:['XAUUSD','DXY','NAS100'],bull:58,bear:38,neutral:4,desc:'Measures change in the price businesses pay for labor. Released with NFP; a key inflation input for the Fed.',hist:'Simulated history: upside surprises aligned with hawkish repricing and gold pullbacks. Demo context only.'},
+ {id:'cpi',title:'US CPI m/m',country:'US',currency:'USD',impact:'HIGH',ts:min(60*27),previous:'0.2%',forecast:'0.3%',actual:null,markets:['XAUUSD','DXY','NAS100','US30'],bull:61,bear:33,neutral:6,desc:'Consumer Price Index measures inflation at the consumer level. A primary driver of Fed policy expectations.',hist:'Simulated history: hot CPI prints have coincided with yield spikes and initial gold weakness, often partially retraced. Demo context only.'},
+ {id:'pmi',title:'ISM Services PMI',country:'US',currency:'USD',impact:'MEDIUM',ts:min(60*31),previous:'51.8',forecast:'52.0',actual:null,markets:['DXY','US30','NAS100'],bull:49,bear:42,neutral:9,desc:'Survey of purchasing managers in the services sector. Above 50 indicates expansion.',hist:'Simulated history: modest market reaction unless far from forecast. Demo context only.'},
+ {id:'claims',title:'Unemployment Claims',country:'US',currency:'USD',impact:'MEDIUM',ts:min(60*49),previous:'219K',forecast:'222K',actual:null,markets:['XAUUSD','DXY'],bull:52,bear:40,neutral:8,desc:'Weekly count of first-time jobless claims. A timely read on US labor conditions.',hist:'Simulated history: sustained rises in claims supported gold via rate-cut expectations. Demo context only.'},
+ {id:'ppi',title:'US PPI m/m',country:'US',currency:'USD',impact:'MEDIUM',ts:min(60*52),previous:'0.1%',forecast:'0.2%',actual:null,markets:['XAUUSD','DXY'],bull:55,bear:37,neutral:8,desc:'Producer Price Index measures inflation at the wholesale level, often leading consumer inflation.',hist:'Simulated history: pipeline inflation surprises nudged Fed expectations. Demo context only.'},
+ {id:'fomc',title:'FOMC Statement',country:'US',currency:'USD',impact:'HIGH',ts:min(60*76),previous:'—',forecast:'—',actual:null,markets:['XAUUSD','DXY','US30','NAS100','EURUSD'],bull:66,bear:28,neutral:6,desc:'The Federal Open Market Committee statement communicates the Fed\u2019s policy stance and outlook.',hist:'Simulated history: statement language shifts triggered multi-session gold trends. Demo context only.'},
+ {id:'rate',title:'Fed Interest Rate Decision',country:'US',currency:'USD',impact:'HIGH',ts:min(60*76),previous:'4.50%',forecast:'4.25%',actual:null,markets:['XAUUSD','DXY','US30','EURUSD','USDJPY'],bull:71,bear:24,neutral:5,desc:'The federal funds rate decision — the single most important scheduled event for USD pairs and gold.',hist:'Simulated history: cuts beyond forecast supported gold; hawkish holds pressured it. Demo context only.'},
+ {id:'retail',title:'US Retail Sales m/m',country:'US',currency:'USD',impact:'MEDIUM',ts:min(60*99),previous:'0.4%',forecast:'0.3%',actual:null,markets:['DXY','US30'],bull:47,bear:44,neutral:9,desc:'Measures change in total value of retail-level sales — the primary gauge of consumer spending.',hist:'Simulated history: consumer resilience supported USD on strong prints. Demo context only.'},
+ {id:'gdp',title:'US GDP q/q (Adv)',country:'US',currency:'USD',impact:'HIGH',ts:min(60*146),previous:'2.8%',forecast:'2.4%',actual:null,markets:['XAUUSD','DXY','US30','NAS100'],bull:59,bear:33,neutral:8,desc:'Advance estimate of quarterly economic growth. Broadest measure of economic activity.',hist:'Simulated history: growth misses lifted gold via easing expectations. Demo context only.'},
+ {id:'jolts',title:'JOLTS Job Openings',country:'US',currency:'USD',impact:'MEDIUM',ts:min(-180),previous:'7.44M',forecast:'7.50M',actual:'7.61M',markets:['XAUUSD','DXY'],bull:41,bear:51,neutral:8,desc:'Number of job openings, a labor-demand gauge watched closely by the Fed.',hist:'Simulated history: upside surprises firmed USD modestly. Demo context only.'},
+ {id:'adp',title:'ADP Employment Change',country:'US',currency:'USD',impact:'MEDIUM',ts:min(-60*25),previous:'122K',forecast:'140K',actual:'151K',markets:['XAUUSD','DXY'],bull:44,bear:48,neutral:8,desc:'Private-sector employment estimate released ahead of NFP.',hist:'Simulated history: imperfect NFP predictor but shapes positioning. Demo context only.'}
+];
+const SEED_MARKETS = [
+ {sym:'XAUUSD',name:'Gold / USD',cat:'Metals',price:3850.20,chg:+0.72,status:'OPEN'},
+ {sym:'BTCUSD',name:'Bitcoin / USD',cat:'Crypto',price:112450,chg:+1.23,status:'OPEN'},
+ {sym:'ETHUSD',name:'Ethereum / USD',cat:'Crypto',price:4128.40,chg:-0.85,status:'OPEN'},
+ {sym:'EURUSD',name:'Euro / USD',cat:'Forex',price:1.0864,chg:+0.18,status:'OPEN'},
+ {sym:'GBPUSD',name:'Pound / USD',cat:'Forex',price:1.2742,chg:-0.22,status:'OPEN'},
+ {sym:'USDJPY',name:'USD / Yen',cat:'Forex',price:149.31,chg:+0.41,status:'OPEN'},
+ {sym:'NAS100',name:'Nasdaq 100',cat:'Indices',price:20154.8,chg:+0.95,status:'PRE-MARKET'},
+ {sym:'US30',name:'Dow Jones 30',cat:'Indices',price:42381.5,chg:+0.33,status:'PRE-MARKET'}
+];
+const SEED_COUPONS = [
+ {code:'DETWAL10',type:'percent',value:10,status:'active',limit:100,expiry:'2026-12-31'},
+ {code:'WELCOME',type:'percent',value:15,status:'active',limit:500,expiry:'2026-12-31'},
+ {code:'PRO20',type:'percent',value:20,status:'active',limit:50,expiry:'2026-11-30'}
+];
+const SEED_USERS = [
+ {id:'u1',name:'Daksh',email:'demo@detwal.in',plan:'PRO',role:'user',status:'active',joined:'2026-06-14',last:'Today'},
+ {id:'u2',name:'Admin',email:'admin@detwal.in',plan:'ADMIN',role:'admin',status:'active',joined:'2026-05-02',last:'Today'},
+ {id:'u3',name:'Arjun Mehta',email:'arjun.m@example.com',plan:'PREMIUM',role:'user',status:'active',joined:'2026-07-21',last:'2h ago'},
+ {id:'u4',name:'Sara Iyer',email:'sara.i@example.com',plan:'PRO',role:'user',status:'active',joined:'2026-08-03',last:'1d ago'},
+ {id:'u5',name:'Rohan Kapoor',email:'rohan.k@example.com',plan:'FREE',role:'user',status:'suspended',joined:'2026-08-29',last:'6d ago'},
+ {id:'u6',name:'Mia Fernandes',email:'mia.f@example.com',plan:'PRO',role:'user',status:'active',joined:'2026-09-11',last:'3h ago'}
+];
+const SEED_NOTIFS = [
+ {id:'n1',text:'High-impact event approaching: Nonfarm Payrolls.',time:'12m ago',read:false},
+ {id:'n2',text:'NFP analysis is now available in News Intelligence.',time:'1h ago',read:false},
+ {id:'n3',text:'Your PRO subscription is active.',time:'Yesterday',read:true},
+ {id:'n4',text:'New demo market intelligence published for XAUUSD.',time:'2d ago',read:true}
+];
+const SEED_ACTIVITY = [
+ {text:'Viewed NFP analysis',time:'18 minutes ago',icon:'news'},
+ {text:'Viewed CPI event detail',time:'1 hour ago',icon:'news'},
+ {text:'Subscription renewed — PRO',time:'Yesterday, 09:12',icon:'card'},
+ {text:'Profile updated',time:'2 days ago',icon:'user'},
+ {text:'Logged in from Chrome · Mumbai',time:'2 days ago',icon:'shield'}
+];
+const PLANS = {
+ FREE:{name:'Free',mo:0,yr:0,feats:['Economic calendar','Basic market overview','Limited news details','Community support']},
+ PRO:{name:'Pro',mo:999,yr:9590,feats:['Full news intelligence','Advanced dashboard','Demo model probability','Historical context','Email alerts']},
+ PREMIUM:{name:'Premium',mo:1999,yr:19190,feats:['Everything in Pro','Priority support','Advanced analytics','Early feature access','Telegram alerts (soon)']}
+};
+
+const DB = {
+ get(k,seed){ try{const v=localStorage.getItem('dw_'+k); return v?JSON.parse(v):seed;}catch(e){return seed;} },
+ set(k,v){ try{localStorage.setItem('dw_'+k,JSON.stringify(v));}catch(e){} }
+};
+let news = DB.get('news',SEED_NEWS);
+let coupons = DB.get('coupons',SEED_COUPONS);
+let users = DB.get('users',SEED_USERS);
+let notifs = DB.get('notifs',SEED_NOTIFS);
+let settings = DB.get('settings',{notifications:true,emailAlerts:true,newsAlerts:true,marketAlerts:false,timezone:'Asia/Kolkata (IST)',theme:'Dark'});
+let favorites = DB.get('favs',[]);
+let tickets = DB.get('tickets',[]);
+const saveNews=()=>DB.set('news',news), saveCoupons=()=>DB.set('coupons',coupons),
+      saveUsers=()=>DB.set('users',users), saveNotifs=()=>DB.set('notifs',notifs),
+      saveSettings=()=>DB.set('settings',settings), saveFavs=()=>DB.set('favs',favorites),
+      saveTickets=()=>DB.set('tickets',tickets);
+
+/* ================================================================
+   AUTH SERVICE (mock — localStorage; replace with Supabase later)
+================================================================ */
+const Auth = {
+ current(){ return DB.get('session',null); },
+ login(email,pass){
+   const creds={'demo@detwal.in':{pass:'demo123',name:'Daksh',role:'user',plan:'PRO'},
+                'admin@detwal.in':{pass:'admin123',name:'Admin',role:'admin',plan:'ADMIN'}};
+   const signups = DB.get('signups',{});
+   let u = creds[email] && creds[email].pass===pass ? creds[email]
+         : (signups[email] && signups[email].pass===pass ? signups[email] : null);
+   if(!u) return null;
+   const sess={email,name:u.name,role:u.role,plan:u.plan,joined:u.joined||'2026-06-14'};
+   DB.set('session',sess); return sess;
+ },
+ signup(name,email,pass){
+   const signups = DB.get('signups',{});
+   signups[email]={pass,name,role:'user',plan:'FREE',joined:new Date().toISOString().slice(0,10)};
+   DB.set('signups',signups);
+   const sess={email,name,role:'user',plan:'FREE',joined:signups[email].joined};
+   DB.set('session',sess); return sess;
+ },
+ logout(){ localStorage.removeItem('dw_session'); },
+ updatePlan(plan){ const s=Auth.current(); if(s){s.plan=plan;DB.set('session',s);} },
+ updateName(n){ const s=Auth.current(); if(s){s.name=n;DB.set('session',s);} }
+};
+
+/* ================================================================
+   UTILITIES
+================================================================ */
+const fmtPrice = p => p>=1000 ? p.toLocaleString('en-US',{minimumFractionDigits:p<10000?2:0,maximumFractionDigits:p<10000?2:0}) : p.toFixed(4);
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const impactPill = i => '<span class="pill '+(i==='HIGH'?'pill-high':i==='MEDIUM'?'pill-med':'pill-low')+'">'+i+'</span>';
+function seededSeries(seed,n,base,vol){
+ let s=seed,out=[],v=base;
+ const rnd=()=>{s=(s*9301+49297)%233280;return s/233280;};
+ for(let i=0;i<n;i++){v+=(rnd()-0.48)*vol;out.push(+v.toFixed(2));}
+ return out;
+}
+function sparkSVG(data,color,w=110,h=34){
+ const mn=Math.min(...data),mx=Math.max(...data),r=mx-mn||1;
+ const pts=data.map((v,i)=>((i/(data.length-1))*w).toFixed(1)+','+((h-3)-((v-mn)/r)*(h-6)).toFixed(1)).join(' ');
+ return '<svg class="spark" width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'"><path d="M'+pts.split(' ').join(' L')+'" fill="none" stroke="'+color+'" stroke-width="1.8" stroke-linecap="round"/></svg>';
+}
+function countdownStr(ts){
+ let d=Math.max(0,Math.floor((ts-Date.now())/1000));
+ if(d<=0) return 'RELEASED';
+ const dd=Math.floor(d/86400),h=Math.floor(d%86400/3600),m=Math.floor(d%3600/60),s=d%60,p=n=>String(n).padStart(2,'0');
+ return (dd>0?p(dd)+':':'')+p(h)+':'+p(m)+':'+p(s);
+}
+function eventDateLabel(ts){
+ const d=new Date(ts);
+ return d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}).toUpperCase();
+}
+function eventTime(ts){ return new Date(ts).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}); }
+const nextEvent = () => news.filter(n=>n.ts>Date.now()).sort((a,b)=>a.ts-b.ts)[0];
+
+/* ================================================================
+   TOAST / MODAL
+================================================================ */
+const Toast = {
+ show(msg,type='success'){
+   const colors={success:'var(--pos)',error:'var(--neg)',warning:'var(--warn)',info:'var(--blue)'};
+   const icons={success:'check',error:'x',warning:'alert',info:'bell'};
+   const el=document.createElement('div');
+   el.className='toast';
+   el.innerHTML='<span style="color:'+colors[type]+'">'+I(icons[type],17)+'</span><span>'+esc(msg)+'</span>';
+   document.getElementById('toastRoot').appendChild(el);
+   setTimeout(()=>{el.style.transition='opacity .3s,transform .3s';el.style.opacity='0';el.style.transform='translateX(24px)';setTimeout(()=>el.remove(),320);},2800);
+ }
+};
+const Modal = {
+ open(html){ document.getElementById('modalContent').innerHTML=html; document.getElementById('modalRoot').classList.add('open'); },
+ close(){ document.getElementById('modalRoot').classList.remove('open'); }
+};
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape'){ Modal.close(); Search.close(); }
+ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){ e.preventDefault(); Search.open(); }
+});
+
+/* ================================================================
+   GLOBAL SEARCH (Ctrl+K)
+================================================================ */
+const Search = {
+ open(){ document.getElementById('searchRoot').classList.add('open'); document.getElementById('srIcon').innerHTML=I('search',17); const i=document.getElementById('searchInput'); i.value=''; Search.renderResults(''); setTimeout(()=>i.focus(),50); },
+ close(){ document.getElementById('searchRoot').classList.remove('open'); },
+ renderResults(q){
+   q=q.toLowerCase();
+   const pages=[['Dashboard','#/dashboard','home'],['News Calendar','#/news','calendar'],['Markets','#/markets','chart'],['Pricing','#/pricing','card'],['Settings','#/settings','settings'],['Profile','#/profile','user'],['Support','#/support','help']];
+   let out='';
+   news.filter(n=>n.title.toLowerCase().includes(q)).slice(0,4).forEach(n=>{
+     out+='<div class="sr-item" onclick="Search.close();go(\'#/news/'+n.id+'\')"><span class="sub">'+I('news',16)+'</span><div><div style="font-weight:600">'+esc(n.title)+'</div><div class="muted" style="font-size:12px">News event · '+n.currency+'</div></div></div>';
+   });
+   SEED_MARKETS.filter(m=>(m.sym+m.name).toLowerCase().includes(q)).slice(0,3).forEach(m=>{
+     out+='<div class="sr-item" onclick="Search.close();go(\'#/markets\')"><span class="sub">'+I('chart',16)+'</span><div><div style="font-weight:600">'+m.sym+'</div><div class="muted" style="font-size:12px">'+esc(m.name)+'</div></div></div>';
+   });
+   pages.filter(p=>p[0].toLowerCase().includes(q)).forEach(p=>{
+     out+='<div class="sr-item" onclick="Search.close();go(\''+p[1]+'\')"><span class="sub">'+I(p[2],16)+'</span><div style="font-weight:600">'+p[0]+'</div></div>';
+   });
+   document.getElementById('searchResults').innerHTML = out || '<div class="empty">No results found.</div>';
+ }
+};
+document.getElementById('searchInput').addEventListener('input',e=>Search.renderResults(e.target.value));
+document.getElementById('searchRoot').addEventListener('click',e=>{ if(e.target.id==='searchRoot') Search.close(); });
+
+/* ================================================================
+   ROUTER
+================================================================ */
+let charts=[], ticker=null, scrollHandler=null;
+function cleanup(){
+ charts.forEach(c=>{try{c.destroy();}catch(e){}}); charts=[];
+ if(ticker){clearInterval(ticker);ticker=null;}
+ if(scrollHandler){window.removeEventListener('scroll',scrollHandler);scrollHandler=null;}
+}
+function go(hash){ location.hash=hash; }
+function startTicker(){
+ ticker=setInterval(()=>{
+   document.querySelectorAll('[data-cd]').forEach(el=>{
+     const v=countdownStr(+el.dataset.cd);
+     el.textContent=v;
+     if(v==='RELEASED'){el.classList.remove('pulse');el.style.color='var(--bright)';}
+     else if(+el.dataset.cd-Date.now()<30*60000) el.classList.add('pulse');
+   });
+ },1000);
+ document.querySelectorAll('[data-cd]').forEach(el=>el.textContent=countdownStr(+el.dataset.cd));
+}
+function initReveal(){
+ const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}}),{threshold:.12});
+ document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+}
+function render(){
+ cleanup();
+ const h=location.hash||'#/';
+ const app=document.getElementById('app');
+ window.scrollTo(0,0);
+ const routes={
+   '#/':Home,'#/login':Login,'#/signup':Signup,'#/dashboard':Dashboard,'#/news':NewsPage,
+   '#/markets':MarketsPage,'#/pricing':PricingPage,'#/profile':Profile,'#/settings':SettingsPage,
+   '#/support':Support,'#/admin':()=>AdminPage('overview'),'#/admin/users':()=>AdminPage('users'),
+   '#/admin/news':()=>AdminPage('news'),'#/admin/subscriptions':()=>AdminPage('subscriptions'),
+   '#/admin/coupons':()=>AdminPage('coupons'),'#/admin/activity':()=>AdminPage('activity'),
+   '#/admin/settings':()=>AdminPage('settings'),'#/privacy':()=>LegalPage('Privacy Policy'),
+   '#/terms':()=>LegalPage('Terms of Service'),'#/disclaimer':()=>LegalPage('Disclaimer')
+ };
+ if(h.startsWith('#/news/')){ NewsDetail(h.slice(7)); return; }
+ (routes[h]||NotFound)();
+}
+window.addEventListener('hashchange',render);
+
+/* ================================================================
+   SHARED: PUBLIC NAVBAR + FOOTER
+================================================================ */
+function publicNav(){
+ return '<nav id="navbar"><div class="container flex between">'
+ +'<a href="#/" class="logo">DETWAL<span class="dot"></span></a>'
+ +'<div class="nav-links"><a href="#/#features">Features</a><a href="#/news">News</a><a href="#/markets">Markets</a><a href="#/pricing">Pricing</a></div>'
+ +'<div class="flex nav-cta" style="gap:10px"><a href="#/login" class="btn btn-ghost btn-sm">Login</a><a href="#/signup" class="btn btn-primary btn-sm">Get Started</a></div>'
+ +'<button class="icon-btn hamburger" aria-label="Menu" onclick="document.getElementById(\'mobileMenu\').classList.add(\'open\')">'+I('menu',22)+'</button>'
+ +'</div></nav>'
+ +'<div id="mobileMenu"><div class="flex between" style="margin-bottom:12px"><span class="logo">DETWAL<span class="dot"></span></span><button class="icon-btn" aria-label="Close" onclick="document.getElementById(\'mobileMenu\').classList.remove(\'open\')">'+I('x',22)+'</button></div>'
+ +['Features|#/#features','News|#/news','Markets|#/markets','Pricing|#/pricing','Login|#/login'].map(l=>{const[t,u]=l.split('|');return '<a href="'+u+'" onclick="document.getElementById(\'mobileMenu\').classList.remove(\'open\')">'+t+'</a>';}).join('')
+ +'<a href="#/signup" class="btn btn-primary" style="margin-top:20px" onclick="document.getElementById(\'mobileMenu\').classList.remove(\'open\')">Get Started</a></div>';
+}
+function attachNavScroll(){
+ scrollHandler=()=>{const n=document.getElementById('navbar'); if(n) n.classList.toggle('scrolled',window.scrollY>30);};
+ window.addEventListener('scroll',scrollHandler); scrollHandler();
+}
+function footerHTML(){
+ return '<footer><div class="container"><div class="grid" style="grid-template-columns:2fr 1fr 1fr 1fr;gap:34px" id="footGrid">'
+ +'<div><div class="logo" style="margin-bottom:12px">DETWAL<span class="dot"></span></div><p class="muted" style="font-size:14px;max-width:290px">Market intelligence for modern traders. Track the economic events that move markets.</p>'
+ +'<p class="muted" style="font-size:12px;margin-top:16px;max-width:320px">DETWAL provides market information and analytical tools for informational purposes only. Users are responsible for their own trading decisions. All data shown in this demo is simulated.</p></div>'
+ +'<div><div style="font-weight:700;margin-bottom:14px;font-size:14px">Product</div><a href="#/markets">Markets</a><a href="#/news">News</a><a href="#/pricing">Pricing</a><a href="#/dashboard">Dashboard</a></div>'
+ +'<div><div style="font-weight:700;margin-bottom:14px;font-size:14px">Support</div><a href="#/support">Help Center</a><a href="#/support">Contact</a><a href="#/support">FAQ</a></div>'
+ +'<div><div style="font-weight:700;margin-bottom:14px;font-size:14px">Legal</div><a href="#/privacy">Privacy</a><a href="#/terms">Terms</a><a href="#/disclaimer">Disclaimer</a></div>'
+ +'</div><div style="border-top:1px solid var(--border);margin-top:40px;padding-top:22px" class="flex between"><span class="muted" style="font-size:13px">© 2026 DETWAL · detwal.in</span><span class="pill pill-gray">Demo — simulated data</span></div></div></footer>'
+ +'<style>@media(max-width:760px){#footGrid{grid-template-columns:1fr 1fr !important}}</style>';
+}
+
+/* ================================================================
+   PAGE: HOME
+================================================================ */
+function heroTerminal(){
+ const ne=nextEvent()||news[0];
+ return '<div class="terminal a-scale d3" style="max-width:860px;margin:54px auto 0">'
+ +'<div class="term-head"><span class="term-dot" style="background:#ff5f57"></span><span class="term-dot" style="background:#febc2e"></span><span class="term-dot" style="background:#28c840"></span><span class="muted" style="font-size:12px;margin-left:8px">detwal.in/dashboard</span><span class="pill pill-gray" style="margin-left:auto">Demo data</span></div>'
+ +'<div style="padding:20px" class="grid" id="heroGrid">'
+   +'<div class="card a-up d4" style="padding:18px">'
+     +'<div class="flex between"><div><div class="muted" style="font-size:12px;font-weight:600;letter-spacing:.06em">XAUUSD · GOLD</div><div class="mono" style="font-size:30px;font-weight:800;margin-top:2px">$3,850.20</div></div><span class="pill pill-green">'+I('up',12)+' +0.72%</span></div>'
+     +'<div style="margin-top:12px">'+sparkSVG(seededSeries(7,40,3838,6),'#00D9A5',520,74)+'</div>'
+   +'</div>'
+   +'<div style="display:grid;gap:14px">'
+     +'<div class="card a-up d5" style="padding:16px"><div class="flex between" style="margin-bottom:8px"><span class="muted" style="font-size:12px;font-weight:600">NEXT EVENT</span>'+impactPill(ne.impact)+'</div><div style="font-weight:700;font-size:15px">'+esc(ne.title)+'</div><div class="mono" data-cd="'+ne.ts+'" style="font-size:22px;font-weight:800;color:var(--bright);margin-top:6px">—</div></div>'
+     +'<div class="card a-up d6" style="padding:16px"><div class="muted" style="font-size:12px;font-weight:600;margin-bottom:10px">DEMO MODEL · XAUUSD</div>'+probBars(74,26,0,true)+'</div>'
+   +'</div>'
+ +'</div></div>'
+ +'<style>#heroGrid{grid-template-columns:1.5fr 1fr;gap:14px}@media(max-width:760px){#heroGrid{grid-template-columns:1fr}}</style>';
+}
+function probBars(b,s,n,compact=false){
+ const row=(label,val,color,delay)=>'<div style="margin-bottom:'+(compact?'8':'13')+'px"><div class="flex between" style="font-size:'+(compact?'12':'13')+'px;margin-bottom:4px"><span class="sub">'+label+'</span><span class="mono" style="font-weight:700;color:'+color+'">'+val+'%</span></div><div style="background:rgba(255,255,255,.06);border-radius:999px;height:8px;overflow:hidden"><div class="prob-bar" style="width:'+val+'%;background:'+color+';animation-delay:'+delay+'s"></div></div></div>';
+ return row('Bullish',b,'#22C55E',.2)+row('Bearish',s,'#EF4444',.35)+row('Neutral',n,'#71717A',.5);
+}
+function Home(){
+ const feats=[['calendar','Economic Calendar','Track upcoming high-impact economic events with precise timing and release data.'],
+  ['zap','Market Intelligence','Understand how major data releases may affect markets with structured context.'],
+  ['chart','XAUUSD Focus','Dedicated gold market monitoring built around the events that move XAUUSD.'],
+  ['activity','Probability Analytics','Visualize demo model probabilities for bullish, bearish and neutral scenarios.'],
+  ['clock','Real-Time Countdown','Know exactly when major events are approaching, down to the second.'],
+  ['news','Historical Context','Review previous, forecast and actual data alongside historical observations.']];
+ const steps=[['Select a market','Choose XAUUSD or any supported instrument.'],['Track upcoming news','Follow high-impact releases on the calendar.'],['Review the data','Compare previous, forecast and actual values.'],['Review demo intelligence','See structured, clearly-labeled model output.'],['Decide for yourself','Make your own informed trading decision.']];
+ const faqs=[['What is DETWAL?','DETWAL is a trading-news intelligence platform focused on XAUUSD/gold and major market-moving economic events. It combines an economic calendar, market overviews and structured analytical context in one dashboard.'],
+  ['What markets are supported?','XAUUSD is the primary focus, alongside major crypto (BTC, ETH), forex pairs (EURUSD, GBPUSD, USDJPY) and indices (NAS100, US30).'],
+  ['What is high-impact news?','Scheduled economic releases — such as NFP, CPI and Fed rate decisions — that historically coincide with elevated volatility in related markets.'],
+  ['How does the probability model work?','The model produces directional probability estimates based on event context. In this demo, all probabilities are simulated and clearly labeled as demo model output. They are not predictions or advice.'],
+  ['Is DETWAL financial advice?','No. DETWAL provides market information and analytical tools for informational purposes only. You are responsible for your own trading decisions.'],
+  ['Can I cancel my subscription?','Yes, subscriptions can be cancelled anytime from your profile. Access continues until the end of the billing period.'],
+  ['Does DETWAL provide live prices?','This demo uses simulated market data. Live data integrations are part of the production roadmap.'],
+  ['How accurate is the model?','No model can guarantee accuracy, and DETWAL makes no accuracy or profit claims. Model output is contextual information, not a signal to trade.']];
+ document.getElementById('app').innerHTML = publicNav()
+ +'<section class="hero"><div class="hero-glow"></div><div class="hero-grid"></div><div class="container" style="text-align:center;position:relative">'
+   +'<div class="a-up"><span class="pill pill-green">'+I('zap',12)+' Economic event intelligence</span></div>'
+   +'<h1 class="a-up d1" style="margin-top:22px">Trade the News.<br><span class="grad">Understand the Market.</span></h1>'
+   +'<p class="a-up d2 sub" style="max-width:560px;margin:20px auto 0;font-size:17px">Market intelligence built around the economic events that move markets. Built for market-focused traders.</p>'
+   +'<div class="a-up d3 flex" style="gap:12px;justify-content:center;margin-top:30px;flex-wrap:wrap"><a href="#/signup" class="btn btn-primary">Get Started '+I('arrowR',16)+'</a><a href="#/dashboard" class="btn btn-secondary">Explore Dashboard</a></div>'
+   +'<p class="a-up d4 muted" style="font-size:12px;margin-top:14px">Market intelligence for informational purposes only.</p>'
+   +heroTerminal()
+ +'</div></section>'
+ /* market strip */
+ +'<section style="border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg2);padding:16px 0;overflow:hidden"><div class="container flex" style="gap:34px;overflow-x:auto;scrollbar-width:none">'
+   +SEED_MARKETS.map(m=>'<div class="flex" style="gap:10px;flex-shrink:0"><span style="font-weight:700;font-size:13px">'+m.sym+'</span><span class="mono sub" style="font-size:13px">'+fmtPrice(m.price)+'</span><span class="mono '+(m.chg>=0?'pos':'neg')+'" style="font-size:13px;font-weight:600">'+(m.chg>=0?'+':'')+m.chg.toFixed(2)+'%</span></div>').join('')
+   +'<span class="pill pill-gray" style="flex-shrink:0">Demo market data</span>'
+ +'</div></section>'
+ /* features */
+ +'<section class="section" id="features"><div class="container"><div style="text-align:center;max-width:620px;margin:0 auto 54px" class="reveal"><h2 class="sec-title">Everything you need around market-moving news.</h2><p class="sub" style="margin-top:14px">A single terminal for economic events, market context and structured intelligence.</p></div>'
+   +'<div class="g3">'+feats.map((f,i)=>'<div class="card card-hover reveal" style="transition-delay:'+(i*.05)+'s"><div class="feature-ico">'+I(f[0],22)+'</div><h3 style="font-size:17px;margin-bottom:8px">'+f[1]+'</h3><p class="sub" style="font-size:14px">'+f[2]+'</p></div>').join('')+'</div>'
+ +'</div></section>'
+ /* calendar preview */
+ +'<section class="section" style="background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)"><div class="container"><div class="flex between" style="margin-bottom:34px;flex-wrap:wrap;gap:14px"><div class="reveal"><h2 class="sec-title">What\u2019s moving the market next?</h2><p class="sub" style="margin-top:10px">Upcoming high-impact releases. <span class="pill pill-gray">Demo calendar</span></p></div><a href="#/news" class="btn btn-secondary btn-sm reveal">Full calendar '+I('arrowR',15)+'</a></div>'
+   +'<div style="display:grid;gap:12px">'+news.filter(n=>n.ts>Date.now()).sort((a,b)=>a.ts-b.ts).slice(0,4).map((n,i)=>
+     '<div class="card card-hover reveal flex between" style="gap:16px;flex-wrap:wrap;cursor:pointer;transition-delay:'+(i*.06)+'s" onclick="go(\'#/news/'+n.id+'\')">'
+     +'<div class="flex" style="gap:14px"><div style="text-align:center;min-width:52px"><div class="mono" style="font-weight:700">'+eventTime(n.ts)+'</div><div class="muted" style="font-size:11px">'+n.currency+'</div></div><div><div style="font-weight:700">'+esc(n.title)+'</div><div class="muted" style="font-size:12.5px;margin-top:2px">Prev '+n.previous+' · Fcst '+n.forecast+' · Act '+(n.actual||'—')+'</div></div></div>'
+     +'<div class="flex" style="gap:14px">'+impactPill(n.impact)+'<span class="mono" data-cd="'+n.ts+'" style="font-weight:700;color:var(--bright);min-width:86px;text-align:right">—</span></div></div>').join('')
+   +'</div></div></section>'
+ /* how it works */
+ +'<section class="section"><div class="container"><h2 class="sec-title reveal" style="text-align:center;margin-bottom:54px">How DETWAL works</h2><div class="g3" style="grid-template-columns:repeat(5,1fr)" id="howGrid">'
+   +steps.map((s,i)=>'<div class="reveal" style="text-align:center;transition-delay:'+(i*.07)+'s"><div style="width:42px;height:42px;border-radius:50%;background:rgba(0,217,165,.1);border:1px solid rgba(0,217,165,.3);color:var(--bright);display:flex;align-items:center;justify-content:center;font-weight:800;margin:0 auto 14px">'+(i+1)+'</div><div style="font-weight:700;font-size:14.5px;margin-bottom:6px">'+s[0]+'</div><p class="muted" style="font-size:13px">'+s[1]+'</p></div>').join('')
+ +'</div></div><style>@media(max-width:900px){#howGrid{grid-template-columns:1fr 1fr !important}}@media(max-width:560px){#howGrid{grid-template-columns:1fr !important}}</style></section>'
+ /* pricing teaser */
+ +'<section class="section" style="background:var(--bg2);border-top:1px solid var(--border)"><div class="container" style="text-align:center"><h2 class="sec-title reveal">Choose your access.</h2><p class="sub reveal" style="margin:12px 0 30px">Start free. Upgrade when you need deeper intelligence.</p><a href="#/pricing" class="btn btn-primary reveal">View Pricing '+I('arrowR',16)+'</a></div></section>'
+ /* FAQ */
+ +'<section class="section"><div class="container" style="max-width:760px"><h2 class="sec-title reveal" style="text-align:center;margin-bottom:40px">Frequently asked questions</h2>'
+   +faqs.map(f=>'<div class="faq-item reveal"><button class="faq-q" onclick="this.parentElement.classList.toggle(\'open\')">'+f[0]+'<span class="muted">'+I('chevD',18)+'</span></button><div class="faq-a">'+f[1]+'</div></div>').join('')
+ +'</div></section>'
+ /* CTA */
+ +'<section class="section" style="position:relative;overflow:hidden"><div class="hero-glow" style="top:auto;bottom:-300px"></div><div class="container" style="text-align:center;position:relative"><h2 class="sec-title reveal">Stay ahead of the next<br>market-moving event.</h2><div class="flex reveal" style="gap:12px;justify-content:center;margin-top:28px;flex-wrap:wrap"><a href="#/signup" class="btn btn-primary">Get Started</a><a href="#/dashboard" class="btn btn-secondary">Explore Dashboard</a></div></div></section>'
+ +footerHTML();
+ attachNavScroll(); startTicker(); initReveal();
+}
+
+/* ================================================================
+   PAGES: AUTH
+================================================================ */
+function authShell(inner){
+ document.getElementById('app').innerHTML =
+ '<div class="auth-wrap"><div class="hero-glow"></div><div class="hero-grid"></div>'
+ +'<div class="card a-scale" style="max-width:420px;width:100%;position:relative;padding:34px;background:var(--card2)">'
+ +'<a href="#/" class="logo" style="display:flex;justify-content:center;margin-bottom:26px">DETWAL<span class="dot"></span></a>'+inner+'</div></div>';
+}
+function Login(){
+ authShell('<h2 style="text-align:center;font-size:22px;margin-bottom:6px">Welcome back</h2><p class="sub" style="text-align:center;font-size:14px;margin-bottom:24px">Sign in to your intelligence dashboard</p>'
+ +'<div class="field"><label class="lbl" for="le">Email</label><input id="le" class="input" type="email" placeholder="you@example.com" value="demo@detwal.in"></div>'
+ +'<div class="field"><label class="lbl" for="lp">Password</label><input id="lp" class="input" type="password" placeholder="••••••••" value="demo123"></div>'
+ +'<div class="flex between" style="margin-bottom:20px;font-size:13px"><label class="flex" style="gap:7px;color:var(--sub)"><input type="checkbox" checked> Remember me</label><a href="javascript:void(0)" onclick="Toast.show(\'Demo: a reset link would be emailed.\',\'info\')" style="color:var(--bright)">Forgot password?</a></div>'
+ +'<button class="btn btn-primary btn-block" onclick="doLogin()">Login</button>'
+ +'<button class="btn btn-secondary btn-block" style="margin-top:10px" onclick="Toast.show(\'Google sign-in is a demo placeholder.\',\'info\')"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="#fff" d="M21.35 11.1H12v2.9h5.35c-.5 2.5-2.6 3.9-5.35 3.9a6 6 0 110-12c1.5 0 2.9.55 3.95 1.5l2.15-2.15A9 9 0 1012 21c5.2 0 8.6-3.65 8.6-8.8 0-.4-.1-.75-.25-1.1z"/></svg> Continue with Google</button>'
+ +'<div class="glass" style="margin-top:20px;padding:12px;border-radius:11px;font-size:12.5px;color:var(--sub)"><b style="color:var(--bright)">Demo logins</b><br>demo@detwal.in / demo123<br>admin@detwal.in / admin123</div>'
+ +'<p style="text-align:center;font-size:13.5px;margin-top:18px" class="sub">No account? <a href="#/signup" style="color:var(--bright);font-weight:600">Sign up</a></p>');
+}
+function doLogin(){
+ const e=document.getElementById('le').value.trim(),p=document.getElementById('lp').value;
+ const s=Auth.login(e,p);
+ if(s){ Toast.show('Welcome back, '+s.name+'!'); go('#/dashboard'); }
+ else Toast.show('Invalid credentials. Try the demo logins.','error');
+}
+function Signup(){
+ authShell('<h2 style="text-align:center;font-size:22px;margin-bottom:6px">Create your account</h2><p class="sub" style="text-align:center;font-size:14px;margin-bottom:24px">Start tracking market-moving events</p>'
+ +'<div class="field"><label class="lbl" for="sn">Full name</label><input id="sn" class="input" placeholder="Your name"></div>'
+ +'<div class="field"><label class="lbl" for="se">Email</label><input id="se" class="input" type="email" placeholder="you@example.com"></div>'
+ +'<div class="field"><label class="lbl" for="sp">Password</label><input id="sp" class="input" type="password" placeholder="Min. 6 characters" oninput="pwMeter(this.value)"><div style="height:5px;background:rgba(255,255,255,.07);border-radius:99px;margin-top:8px;overflow:hidden"><div id="pwBar" style="height:100%;width:0;border-radius:99px;transition:all .3s"></div></div><div id="pwTxt" class="muted" style="font-size:12px;margin-top:5px"></div></div>'
+ +'<div class="field"><label class="lbl" for="sc">Confirm password</label><input id="sc" class="input" type="password" placeholder="Repeat password"></div>'
+ +'<label class="flex" style="gap:8px;font-size:13px;color:var(--sub);margin-bottom:20px"><input type="checkbox" id="st"> I agree to the <a href="#/terms" style="color:var(--bright)">Terms</a> and <a href="#/privacy" style="color:var(--bright)">Privacy Policy</a></label>'
+ +'<button class="btn btn-primary btn-block" onclick="doSignup()">Create account</button>'
+ +'<p style="text-align:center;font-size:13.5px;margin-top:18px" class="sub">Already have an account? <a href="#/login" style="color:var(--bright);font-weight:600">Login</a></p>');
+}
+function pwMeter(v){
+ let s=0; if(v.length>=6)s++; if(v.length>=10)s++; if(/[0-9]/.test(v)&&/[a-zA-Z]/.test(v))s++; if(/[^a-zA-Z0-9]/.test(v))s++;
+ const bar=document.getElementById('pwBar'),txt=document.getElementById('pwTxt');
+ const L=[['','',''],['25%','#EF4444','Weak'],['50%','#F59E0B','Fair'],['75%','#26A69A','Good'],['100%','#00D9A5','Strong']][s];
+ bar.style.width=L[0];bar.style.background=L[1];txt.textContent=L[2]?('Strength: '+L[2]):'';
+}
+function doSignup(){
+ const n=document.getElementById('sn').value.trim(),e=document.getElementById('se').value.trim(),
+       p=document.getElementById('sp').value,c=document.getElementById('sc').value,t=document.getElementById('st').checked;
+ if(!n) return Toast.show('Please enter your name.','error');
+ if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) return Toast.show('Enter a valid email address.','error');
+ if(p.length<6) return Toast.show('Password must be at least 6 characters.','error');
+ if(p!==c) return Toast.show('Passwords do not match.','error');
+ if(!t) return Toast.show('Please accept the terms.','warning');
+ Auth.signup(n,e,p);
+ Toast.show('Account created. Welcome to DETWAL!');
+ go('#/dashboard');
+}
+
+/* ================================================================
+   DASHBOARD SHELL
+================================================================ */
+function requireAuth(){
+ const s=Auth.current();
+ if(!s){ go('#/login'); return null; }
+ return s;
+}
+function dashShell(active,content,user){
+ const links=[['dashboard','home','Dashboard','#/dashboard'],['news','calendar','News','#/news'],['markets','chart','Markets','#/markets'],['intel','activity','Intelligence','#/news'],['pricing','card','Pricing','#/pricing'],['profile','user','Profile','#/profile'],['settings','settings','Settings','#/settings'],['support','help','Support','#/support']];
+ if(user.role==='admin') links.push(['admin','shield','Admin','#/admin']);
+ const unread=notifs.filter(n=>!n.read).length;
+ const hour=new Date().getHours();
+ const greet=hour<12?'Good morning':hour<17?'Good afternoon':'Good evening';
+ document.getElementById('app').innerHTML =
+ '<div class="shell"><div class="overlay" id="sbOverlay" onclick="toggleSB(false)"></div>'
+ +'<aside class="sidebar" id="sidebar">'
+   +'<div style="padding:20px 20px 14px" class="flex between"><a href="#/" class="logo" style="font-size:17px">DETWAL<span class="dot"></span></a><span class="pill pill-gray">DEMO</span></div>'
+   +'<div class="s-links">'+links.map(l=>'<a class="s-link'+(active===l[0]?' active':'')+'" href="'+l[3]+'">'+I(l[1],17)+l[2]+'</a>').join('')+'</div>'
+   +'<div style="padding:14px;border-top:1px solid var(--border)">'
+     +'<div class="flex" style="gap:11px"><div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#26A69A,#00D9A5);display:flex;align-items:center;justify-content:center;font-weight:800;color:#031612;flex-shrink:0">'+esc(user.name[0].toUpperCase())+'</div>'
+     +'<div style="min-width:0;flex:1"><div style="font-weight:700;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(user.name)+'</div><span class="pill '+(user.role==='admin'?'pill-high':'pill-green')+'" style="font-size:9.5px;margin-top:2px">'+(user.role==='admin'?'SUPER ADMIN':user.plan)+'</span></div>'
+     +'<button class="icon-btn" aria-label="Logout" title="Logout" onclick="doLogout()" style="width:36px;height:36px">'+I('logout',16)+'</button></div>'
+   +'</div>'
+ +'</aside>'
+ +'<div class="main"><div class="topbar">'
+   +'<div class="flex" style="gap:12px;min-width:0"><button class="icon-btn hamburger" aria-label="Menu" onclick="toggleSB(true)">'+I('menu',20)+'</button><div style="min-width:0"><div style="font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+greet+', '+esc(user.name)+'</div><div class="muted" style="font-size:12px">'+new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})+'</div></div></div>'
+   +'<div class="flex" style="gap:6px;position:relative">'
+     +'<button class="icon-btn" aria-label="Search" title="Search (Ctrl+K)" onclick="Search.open()">'+I('search',18)+'</button>'
+     +'<div style="position:relative"><button class="icon-btn" aria-label="Notifications" style="position:relative" onclick="toggleNotif()">'+I('bell',18)+(unread?'<span class="unread-dot"></span>':'')+'</button><div id="notifDD"></div></div>'
+     +'<button class="icon-btn" aria-label="Profile" onclick="go(\'#/profile\')">'+I('user',18)+'</button>'
+   +'</div>'
+ +'</div><div class="page-pad">'+content+'</div></div></div>';
+}
+function toggleSB(open){
+ document.getElementById('sidebar').classList.toggle('open',open);
+ document.getElementById('sbOverlay').classList.toggle('show',open);
+}
+function doLogout(){ Auth.logout(); Toast.show('Logged out.','info'); go('#/'); }
+function toggleNotif(){
+ const dd=document.getElementById('notifDD');
+ if(dd.innerHTML){ dd.innerHTML=''; return; }
+ dd.innerHTML='<div class="dropdown"><div class="flex between" style="padding:14px 18px;border-bottom:1px solid var(--border)"><b style="font-size:14px">Notifications</b><button class="btn btn-ghost btn-sm" onclick="markAllRead()" style="min-height:28px;padding:4px 8px;font-size:12px">Mark all read</button></div>'
+ +'<div style="max-height:320px;overflow-y:auto">'+(notifs.length?notifs.map(n=>'<div class="notif-item'+(n.read?'':' unread')+'"><span style="color:var(--bright);flex-shrink:0;margin-top:2px">'+I('bell',15)+'</span><div><div style="font-size:13.5px;font-weight:500">'+esc(n.text)+'</div><div class="muted" style="font-size:11.5px;margin-top:3px">'+n.time+'</div></div></div>').join(''):'<div class="empty">No notifications yet.</div>')+'</div></div>';
+}
+function markAllRead(){ notifs.forEach(n=>n.read=true); saveNotifs(); document.getElementById('notifDD').innerHTML=''; Toast.show('All notifications marked as read.','info'); render(); }
+
+/* ================================================================
+   PAGE: DASHBOARD
+================================================================ */
+function Dashboard(){
+ const u=requireAuth(); if(!u) return;
+ const ne=nextEvent()||news[0];
+ const todayCount=news.filter(n=>new Date(n.ts).toDateString()===new Date().toDateString()).length;
+ const upcoming=news.filter(n=>n.ts>Date.now()).sort((a,b)=>a.ts-b.ts);
+ const content =
+ '<div class="flex between a-up" style="flex-wrap:wrap;gap:12px;margin-bottom:22px"><div><h1 style="font-size:24px;font-weight:800">Market Intelligence</h1><p class="sub" style="font-size:14px">Track the events that matter. <span class="pill pill-gray">Simulated data</span></p></div><span class="pill pill-green">● Markets Open</span></div>'
+ /* stat cards */
+ +'<div class="g4" style="margin-bottom:18px">'
+  +'<div class="card card-hover a-up d1"><div class="muted" style="font-size:12px;font-weight:600;letter-spacing:.05em;margin-bottom:8px">NEXT HIGH IMPACT</div><div style="font-weight:700;font-size:15px">'+esc(ne.title)+'</div><div class="mono" data-cd="'+ne.ts+'" style="font-size:20px;font-weight:800;color:var(--bright);margin-top:5px">—</div></div>'
+  +'<div class="card card-hover a-up d2"><div class="muted" style="font-size:12px;font-weight:600;letter-spacing:.05em;margin-bottom:8px">XAUUSD</div><div class="mono stat-num" id="xauPrice">$3,850.20</div><span class="pill pill-green" style="margin-top:5px">'+I('up',11)+' +0.72%</span></div>'
+  +'<div class="card card-hover a-up d3"><div class="muted" style="font-size:12px;font-weight:600;letter-spacing:.05em;margin-bottom:8px">TODAY\u2019S EVENTS</div><div class="stat-num" data-count="'+Math.max(todayCount,3)+'">0</div><div class="muted" style="font-size:12.5px;margin-top:4px">'+news.filter(n=>n.impact==='HIGH'&&n.ts>Date.now()).length+' high impact upcoming</div></div>'
+  +'<div class="card card-hover a-up d4"><div class="muted" style="font-size:12px;font-weight:600;letter-spacing:.05em;margin-bottom:8px">ACTIVE PLAN</div><div class="stat-num" style="color:var(--bright)">'+u.plan+'</div><a href="#/pricing" class="muted" style="font-size:12.5px;margin-top:4px;display:inline-block">Manage plan →</a></div>'
+ +'</div>'
+ /* chart + next news */
+ +'<div class="dash-main" style="margin-bottom:18px">'
+  +'<div class="card a-up d3"><div class="flex between" style="flex-wrap:wrap;gap:10px;margin-bottom:14px"><div><div style="font-weight:700;font-size:16px">XAUUSD Market Overview</div><div class="muted" style="font-size:12.5px">Gold / US Dollar · Demo data</div></div><div class="flex" style="gap:4px">'+['1H','4H','1D','1W'].map((t,i)=>'<button class="tf-btn'+(i===2?' active':'')+'" onclick="switchTF(this,\''+t+'\')">'+t+'</button>').join('')+'</div></div>'
+  +'<div style="height:280px;position:relative"><canvas id="mainChart"></canvas></div></div>'
+  +'<div style="display:grid;gap:18px;align-content:start">'
+   +'<div class="card a-up d4"><div class="flex between" style="margin-bottom:12px"><div class="muted" style="font-size:12px;font-weight:600;letter-spacing:.05em">NEXT MAJOR NEWS</div>'+impactPill(ne.impact)+'</div>'
+     +'<div style="font-weight:700;font-size:17px">'+esc(ne.title)+'</div><div class="muted" style="font-size:13px;margin-top:2px">'+ne.country+' · '+ne.currency+' · '+eventTime(ne.ts)+'</div>'
+     +'<div class="mono" data-cd="'+ne.ts+'" style="font-size:28px;font-weight:800;color:var(--bright);margin:12px 0">—</div>'
+     +'<div class="g3" style="gap:8px;margin-bottom:14px">'+[['Previous',ne.previous],['Forecast',ne.forecast],['Actual',ne.actual||'—']].map(x=>'<div style="background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:9px;text-align:center"><div class="muted" style="font-size:10.5px;text-transform:uppercase;letter-spacing:.05em">'+x[0]+'</div><div class="mono" style="font-weight:700;font-size:14px;margin-top:2px">'+x[1]+'</div></div>').join('')+'</div>'
+     +'<button class="btn btn-primary btn-block btn-sm" onclick="go(\'#/news/'+ne.id+'\')">View Details</button></div>'
+   +'<div class="card a-up d5"><div class="flex between" style="margin-bottom:14px"><div><div style="font-weight:700;font-size:15px">Demo Model Outlook</div><div class="muted" style="font-size:12px">XAUUSD · next session</div></div><span class="pill pill-gray">Demo model</span></div>'
+     +probBars(ne.bull,ne.bear,ne.neutral)+'<p class="muted" style="font-size:11.5px;margin-top:6px">Demo model output. Simulated. Not financial advice.</p></div>'
+  +'</div>'
+ +'</div>'
+ /* upcoming news table */
+ +'<div class="card a-up d5" style="margin-bottom:18px;padding:0;overflow:hidden"><div class="flex between" style="padding:18px 22px"><div style="font-weight:700;font-size:16px">Upcoming Economic News</div><button class="btn btn-ghost btn-sm" onclick="Toast.show(\'Demo news refreshed.\',\'info\')">Refresh</button></div>'
+  +'<div class="table-wrap" style="border:none;border-top:1px solid var(--border);border-radius:0"><table><thead><tr><th>Event</th><th>Impact</th><th>Ccy</th><th>Previous</th><th>Forecast</th><th>Actual</th><th>Time</th><th>Countdown</th></tr></thead><tbody>'
+  +upcoming.slice(0,8).map(n=>'<tr style="cursor:pointer" onclick="go(\'#/news/'+n.id+'\')"><td style="font-weight:600">'+esc(n.title)+'</td><td>'+impactPill(n.impact)+'</td><td>'+n.currency+'</td><td class="mono sub">'+n.previous+'</td><td class="mono sub">'+n.forecast+'</td><td class="mono">'+(n.actual||'—')+'</td><td class="mono sub">'+eventTime(n.ts)+'</td><td class="mono" style="color:var(--bright);font-weight:600" data-cd="'+n.ts+'">—</td></tr>').join('')
+  +'</tbody></table></div></div>'
+ /* markets + activity */
+ +'<div class="g2">'
+  +'<div class="card a-up d6"><div style="font-weight:700;font-size:16px;margin-bottom:16px">Markets <span class="pill pill-gray" style="margin-left:6px">Demo</span></div><div style="display:grid;gap:10px">'
+   +SEED_MARKETS.slice(0,5).map((m,i)=>'<div class="flex between" style="padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:12px"><div class="flex" style="gap:12px"><div><div style="font-weight:700;font-size:13.5px">'+m.sym+'</div><div class="muted" style="font-size:11.5px">'+esc(m.name)+'</div></div></div><div class="flex" style="gap:14px">'+sparkSVG(seededSeries(i+3,22,100,2),m.chg>=0?'#22C55E':'#EF4444',72,26)+'<div style="text-align:right"><div class="mono" style="font-weight:700;font-size:13.5px">'+fmtPrice(m.price)+'</div><div class="mono '+(m.chg>=0?'pos':'neg')+'" style="font-size:12px;font-weight:600">'+(m.chg>=0?'+':'')+m.chg.toFixed(2)+'%</div></div></div></div>').join('')
+   +'</div><a href="#/markets" class="btn btn-secondary btn-block btn-sm" style="margin-top:14px">All markets</a></div>'
+  +'<div class="card a-up d6"><div style="font-weight:700;font-size:16px;margin-bottom:16px">Recent Activity</div><div style="display:grid;gap:4px">'
+   +SEED_ACTIVITY.map(a=>'<div class="flex" style="gap:13px;padding:11px 6px;border-bottom:1px solid var(--border)"><span style="color:var(--bright)">'+I(a.icon,16)+'</span><div><div style="font-size:13.5px;font-weight:500">'+a.text+'</div><div class="muted" style="font-size:11.5px">'+a.time+'</div></div></div>').join('')
+  +'</div></div>'
+ +'</div>';
+ dashShell('dashboard',content,u);
+ startTicker(); initMainChart('1D'); animateCounters();
+}
+function animateCounters(){
+ document.querySelectorAll('[data-count]').forEach(el=>{
+   const target=+el.dataset.count; let cur=0; const step=Math.max(1,Math.ceil(target/24));
+   const iv=setInterval(()=>{cur+=step;if(cur>=target){cur=target;clearInterval(iv);}el.textContent=cur;},35);
+ });
+}
+function tfData(tf){
+ const cfg={'1H':[1,60,3849,0.9],'4H':[2,60,3846,2.2],'1D':[7,48,3838,4.5],'1W':[11,56,3800,11]}[tf];
+ const data=seededSeries(cfg[0],cfg[1],cfg[2],cfg[3]);
+ const labels=data.map((_,i)=>{
+   const d=new Date(Date.now()-(data.length-i)*({'1H':60,'4H':240,'1D':1800,'1W':10800}[tf])*1000);
+   return tf==='1W'?d.toLocaleDateString('en-US',{month:'short',day:'numeric'}):d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+ });
+ return {data,labels};
+}
+function initMainChart(tf){
+ const el=document.getElementById('mainChart'); if(!el||typeof Chart==='undefined') return;
+ const {data,labels}=tfData(tf);
+ const ctx=el.getContext('2d');
+ const grad=ctx.createLinearGradient(0,0,0,280);
+ grad.addColorStop(0,'rgba(0,217,165,.22)');grad.addColorStop(1,'rgba(0,217,165,0)');
+ charts.push(new Chart(ctx,{type:'line',data:{labels,datasets:[{data,borderColor:'#00D9A5',borderWidth:2,fill:true,backgroundColor:grad,pointRadius:0,pointHoverRadius:4,pointHoverBackgroundColor:'#00D9A5',tension:.35}]},
+  options:{responsive:true,maintainAspectRatio:false,animation:{duration:900,easing:'easeOutQuart'},
+   plugins:{legend:{display:false},tooltip:{backgroundColor:'#151515',borderColor:'rgba(255,255,255,.14)',borderWidth:1,titleColor:'#A1A1AA',bodyColor:'#fff',padding:12,displayColors:false,callbacks:{label:c=>'$'+c.parsed.y.toLocaleString()}}},
+   scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#71717A',font:{size:10},maxTicksLimit:8}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#71717A',font:{size:10},callback:v=>'$'+v.toFixed(0)}}}
+  }}));
+}
+function switchTF(btn,tf){
+ btn.parentElement.querySelectorAll('.tf-btn').forEach(b=>b.classList.remove('active'));
+ btn.classList.add('active');
+ charts.forEach(c=>{try{c.destroy();}catch(e){}}); charts=[];
+ initMainChart(tf);
+}
+
+/* ================================================================
+   PAGE: NEWS (calendar + filters)
+================================================================ */
+let newsFilters={impact:'ALL',ccy:'ALL',date:'ALL',q:''};
+function NewsPage(){
+ const u=Auth.current();
+ const content =
+ '<div class="a-up" style="margin-bottom:20px"><h1 style="font-size:24px;font-weight:800">Economic Calendar</h1><p class="sub" style="font-size:14px">High-impact releases, forecasts and demo intelligence. <span class="pill pill-gray">Demo calendar</span></p></div>'
+ +'<div class="card a-up d1" style="margin-bottom:18px;padding:16px"><div class="flex" style="gap:10px;flex-wrap:wrap">'
+  +'<input class="input" style="max-width:240px" placeholder="Search events…" value="'+esc(newsFilters.q)+'" oninput="newsFilters.q=this.value;renderNewsList()">'
+  +'<select class="input" style="max-width:150px" onchange="newsFilters.date=this.value;renderNewsList()">'+['ALL|All dates','TODAY|Today','TOMORROW|Tomorrow','WEEK|This week'].map(o=>{const[v,t]=o.split('|');return '<option value="'+v+'"'+(newsFilters.date===v?' selected':'')+'>'+t+'</option>';}).join('')+'</select>'
+  +'<select class="input" style="max-width:150px" onchange="newsFilters.impact=this.value;renderNewsList()">'+['ALL|All impact','HIGH|High','MEDIUM|Medium','LOW|Low'].map(o=>{const[v,t]=o.split('|');return '<option value="'+v+'"'+(newsFilters.impact===v?' selected':'')+'>'+t+'</option>';}).join('')+'</select>'
+  +'<select class="input" style="max-width:130px" onchange="newsFilters.ccy=this.value;renderNewsList()">'+['ALL|All ccy','USD|USD','EUR|EUR','GBP|GBP'].map(o=>{const[v,t]=o.split('|');return '<option value="'+v+'"'+(newsFilters.ccy===v?' selected':'')+'>'+t+'</option>';}).join('')+'</select>'
+ +'</div></div>'
+ +'<div id="newsList"></div>';
+ if(u){ dashShell('news',content,u); }
+ else{
+   document.getElementById('app').innerHTML=publicNav()+'<div class="container" style="padding:120px 24px 60px">'+content+'</div>'+footerHTML();
+   attachNavScroll();
+ }
+ renderNewsList(); startTicker();
+}
+function renderNewsList(){
+ const list=document.getElementById('newsList'); if(!list) return;
+ let items=news.slice().sort((a,b)=>a.ts-b.ts);
+ const f=newsFilters, today=new Date().toDateString(), tmr=new Date(Date.now()+86400000).toDateString();
+ if(f.impact!=='ALL') items=items.filter(n=>n.impact===f.impact);
+ if(f.ccy!=='ALL') items=items.filter(n=>n.currency===f.ccy);
+ if(f.q) items=items.filter(n=>n.title.toLowerCase().includes(f.q.toLowerCase()));
+ if(f.date==='TODAY') items=items.filter(n=>new Date(n.ts).toDateString()===today);
+ if(f.date==='TOMORROW') items=items.filter(n=>new Date(n.ts).toDateString()===tmr);
+ if(f.date==='WEEK') items=items.filter(n=>n.ts>Date.now()-86400000&&n.ts<Date.now()+7*86400000);
+ if(!items.length){ list.innerHTML='<div class="card empty a-up"><div style="margin-bottom:10px;color:var(--muted)">'+I('calendar',34)+'</div><b style="color:#fff">No events found</b><p style="font-size:13.5px;margin-top:6px">Try adjusting the filters or search query.</p><button class="btn btn-secondary btn-sm" style="margin-top:14px" onclick="newsFilters={impact:\'ALL\',ccy:\'ALL\',date:\'ALL\',q:\'\'};render()">Reset filters</button></div>'; return; }
+ let out='',lastDay='';
+ items.forEach((n,i)=>{
+   const day=eventDateLabel(n.ts);
+   if(day!==lastDay){ out+='<div class="muted a-up" style="font-size:12px;font-weight:700;letter-spacing:.1em;margin:22px 0 12px">'+day+'</div>'; lastDay=day; }
+   const released=n.ts<=Date.now();
+   out+='<div class="card card-hover a-up flex between" style="gap:14px;flex-wrap:wrap;cursor:pointer;margin-bottom:10px;animation-delay:'+(Math.min(i,8)*.04)+'s" onclick="go(\'#/news/'+n.id+'\')">'
+   +'<div class="flex" style="gap:15px;min-width:0"><div style="text-align:center;min-width:54px"><div class="mono" style="font-weight:700;font-size:14px">'+eventTime(n.ts)+'</div><div class="muted" style="font-size:11px">'+n.country+' · '+n.currency+'</div></div>'
+   +'<div style="min-width:0"><div style="font-weight:700">'+esc(n.title)+'</div><div class="muted mono" style="font-size:12.5px;margin-top:2px">Prev '+n.previous+' · Fcst '+n.forecast+' · Act '+(n.actual||'—')+'</div></div></div>'
+   +'<div class="flex" style="gap:13px">'+impactPill(n.impact)
+   +(released?'<span class="pill pill-green">RELEASED</span>':'<span class="mono" data-cd="'+n.ts+'" style="font-weight:700;color:var(--bright);min-width:84px;text-align:right">—</span>')
+   +'</div></div>';
+ });
+ list.innerHTML=out;
+ if(!ticker) startTicker(); else document.querySelectorAll('[data-cd]').forEach(el=>el.textContent=countdownStr(+el.dataset.cd));
+}
+
+/* ================================================================
+   PAGE: NEWS DETAIL
+================================================================ */
+function NewsDetail(id){
+ const n=news.find(x=>x.id===id);
+ const u=Auth.current();
+ if(!n){ NotFound(); return; }
+ const fav=favorites.includes('news:'+id);
+ const content =
+ '<button class="btn btn-ghost btn-sm a-up" onclick="go(\'#/news\')" style="margin-bottom:16px">← Back to calendar</button>'
+ +'<div class="card a-up d1" style="margin-bottom:18px"><div class="flex between" style="flex-wrap:wrap;gap:14px">'
+   +'<div><div class="flex" style="gap:10px;flex-wrap:wrap;margin-bottom:10px">'+impactPill(n.impact)+'<span class="pill pill-blue">'+n.country+' · '+n.currency+'</span><span class="pill pill-gray">Demo event</span></div>'
+   +'<h1 style="font-size:26px;font-weight:800">'+esc(n.title)+'</h1><p class="sub" style="margin-top:6px;font-size:14px">'+eventDateLabel(n.ts)+' · '+eventTime(n.ts)+'</p></div>'
+   +'<div style="text-align:right"><div class="muted" style="font-size:12px;font-weight:600;margin-bottom:4px">'+(n.ts>Date.now()?'RELEASES IN':'STATUS')+'</div><div class="mono" data-cd="'+n.ts+'" style="font-size:30px;font-weight:800;color:var(--bright)">—</div>'
+   +'<button class="btn btn-ghost btn-sm" style="margin-top:8px;color:'+(fav?'var(--warn)':'var(--muted)')+'" onclick="toggleFav(\'news:'+id+'\')">'+I('star',15)+' '+(fav?'Favorited':'Favorite')+'</button></div>'
+ +'</div></div>'
+ +'<div class="g3" style="margin-bottom:18px">'+[['Previous',n.previous],['Forecast',n.forecast],['Actual',n.actual||'—']].map((x,i)=>'<div class="card card-hover a-up d'+(i+1)+'" style="text-align:center"><div class="muted" style="font-size:11.5px;text-transform:uppercase;letter-spacing:.07em">'+x[0]+'</div><div class="mono" style="font-size:28px;font-weight:800;margin-top:6px;color:'+(x[0]==='Actual'&&n.actual?'var(--bright)':'#fff')+'">'+x[1]+'</div></div>').join('')+'</div>'
+ +'<div class="g2" style="margin-bottom:18px">'
+  +'<div class="card a-up d2"><div class="flex between" style="margin-bottom:16px"><div style="font-weight:700;font-size:16px">Demo Model Probability</div><span class="pill pill-gray">DEMO MODEL DATA</span></div>'
+   +'<div class="muted" style="font-size:13px;margin-bottom:14px">Instrument: <b style="color:#fff">XAUUSD</b> · scenario for post-release session</div>'
+   +probBars(n.bull,n.bear,n.neutral)
+   +'<div class="glass" style="padding:11px;border-radius:11px;margin-top:12px"><p class="muted" style="font-size:12px">⚠ Simulated demo output for presentation purposes. Not a prediction. Not financial advice.</p></div></div>'
+  +'<div class="card a-up d3"><div style="font-weight:700;font-size:16px;margin-bottom:14px">About this event</div><p class="sub" style="font-size:14px;margin-bottom:16px">'+esc(n.desc)+'</p>'
+   +'<div style="font-weight:700;font-size:14px;margin-bottom:10px">Affected markets</div><div class="flex" style="gap:8px;flex-wrap:wrap">'+n.markets.map(m=>'<span class="pill pill-blue">'+m+'</span>').join('')+'</div></div>'
+ +'</div>'
+ +'<div class="card a-up d4"><div style="font-weight:700;font-size:16px;margin-bottom:10px">Historical observations</div><p class="sub" style="font-size:14px">'+esc(n.hist)+'</p>'
+ +'<div class="g3" style="margin-top:18px">'+['Last release|Volatility spike ~18 pips (sim.)','3-release avg|Initial move faded 42% (sim.)','Surprise factor|Forecast beat 4 of last 6 (sim.)'].map(s=>{const[a,b]=s.split('|');return '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px"><div class="muted" style="font-size:11.5px;text-transform:uppercase;letter-spacing:.06em">'+a+'</div><div style="font-weight:600;font-size:13.5px;margin-top:5px">'+b+'</div></div>';}).join('')+'</div></div>';
+ if(u){ dashShell('news',content,u); }
+ else{ document.getElementById('app').innerHTML=publicNav()+'<div class="container" style="padding:110px 24px 60px">'+content+'</div>'+footerHTML(); attachNavScroll(); }
+ startTicker();
+}
+function toggleFav(key){
+ const i=favorites.indexOf(key);
+ if(i>=0){favorites.splice(i,1);Toast.show('Removed from favorites.','info');}
+ else{favorites.push(key);Toast.show('Added to favorites.');}
+ saveFavs(); render();
+}
+
+/* ================================================================
+   PAGE: MARKETS
+================================================================ */
+function MarketsPage(){
+ const u=Auth.current();
+ const cats=['Metals','Crypto','Forex','Indices'];
+ const content =
+ '<div class="a-up" style="margin-bottom:22px"><h1 style="font-size:24px;font-weight:800">Markets</h1><p class="sub" style="font-size:14px">Simulated market overview. <span class="pill pill-gray">Demo market data</span></p></div>'
+ +cats.map((cat,ci)=>{
+   const ms=SEED_MARKETS.filter(m=>m.cat===cat);
+   return '<div class="muted a-up" style="font-size:12px;font-weight:700;letter-spacing:.1em;margin:24px 0 12px">'+cat.toUpperCase()+'</div><div class="g3">'
+   +ms.map((m,i)=>{
+     const fav=favorites.includes('mkt:'+m.sym);
+     return '<div class="card card-hover a-up" style="animation-delay:'+((ci*2+i)*.05)+'s'+(m.sym==='XAUUSD'?';border-color:rgba(0,217,165,.3)':'')+'">'
+     +'<div class="flex between" style="margin-bottom:10px"><div><div class="flex" style="gap:8px"><b style="font-size:15px">'+m.sym+'</b>'+(m.sym==='XAUUSD'?'<span class="pill pill-green">PRIMARY</span>':'')+'</div><div class="muted" style="font-size:12px">'+esc(m.name)+'</div></div>'
+     +'<button class="icon-btn" aria-label="Favorite" style="width:34px;height:34px;color:'+(fav?'var(--warn)':'var(--muted)')+'" onclick="toggleFav(\'mkt:'+m.sym+'\')">'+I('star',15)+'</button></div>'
+     +'<div class="flex between"><div><div class="mono" style="font-size:22px;font-weight:800">'+fmtPrice(m.price)+'</div><span class="mono '+(m.chg>=0?'pos':'neg')+'" style="font-size:13px;font-weight:700">'+(m.chg>=0?'▲ +':'▼ ')+m.chg.toFixed(2)+'%</span></div>'
+     +sparkSVG(seededSeries(i*7+ci+2,26,100,2.3),m.chg>=0?'#22C55E':'#EF4444',96,36)+'</div>'
+     +'<div class="flex between" style="margin-top:12px"><span class="pill '+(m.status==='OPEN'?'pill-green':'pill-med')+'">'+m.status+'</span><span class="muted" style="font-size:11px">Simulated</span></div></div>';
+   }).join('')+'</div>';
+ }).join('');
+ if(u){ dashShell('markets',content,u); }
+ else{ document.getElementById('app').innerHTML=publicNav()+'<div class="container" style="padding:120px 24px 60px">'+content+'</div>'+footerHTML(); attachNavScroll(); }
+}
+
+/* ================================================================
+   PAGE: PRICING + CHECKOUT
+================================================================ */
+let billYearly=false, checkout={plan:null,coupon:null};
+function PricingPage(){
+ const u=Auth.current();
+ const content =
+ '<div style="text-align:center;margin-bottom:36px" class="a-up"><h1 style="font-size:clamp(26px,4vw,38px);font-weight:800">Choose your access.</h1><p class="sub" style="margin-top:12px">Transparent plans. Cancel anytime. Demo checkout — no real payment.</p>'
+ +'<div class="flex" style="gap:10px;justify-content:center;margin-top:24px"><button class="tab-btn'+(!billYearly?' active':'')+'" onclick="billYearly=false;render()">Monthly</button><button class="tab-btn'+(billYearly?' active':'')+'" onclick="billYearly=true;render()">Yearly <span class="pill pill-green" style="margin-left:4px">-20%</span></button></div></div>'
+ +'<div class="g3" style="max-width:1020px;margin:0 auto">'
+ +Object.keys(PLANS).map((k,i)=>{
+   const p=PLANS[k], price=billYearly?p.yr:p.mo, popular=k==='PRO';
+   return '<div class="card card-hover a-up d'+(i+1)+'" style="padding:28px;position:relative'+(popular?';border-color:rgba(0,217,165,.4);box-shadow:0 0 40px rgba(0,217,165,.07)':'')+'">'
+   +(popular?'<span class="pill pill-green" style="position:absolute;top:-11px;left:50%;transform:translateX(-50%)">MOST POPULAR</span>':'')
+   +'<div style="font-weight:700;font-size:17px">'+p.name+'</div>'
+   +'<div style="margin:16px 0"><span class="price-num mono">'+(price===0?'₹0':'₹'+price.toLocaleString('en-IN'))+'</span><span class="muted" style="font-size:14px"> /'+(billYearly?'yr':'mo')+'</span></div>'
+   +'<div style="display:grid;gap:10px;margin-bottom:24px">'+p.feats.map(f=>'<div class="flex" style="gap:9px;font-size:13.5px"><span style="color:var(--bright)">'+I('check',15)+'</span><span class="sub">'+f+'</span></div>').join('')+'</div>'
+   +(k==='FREE'
+     ?'<button class="btn btn-secondary btn-block" onclick="'+(u?'Toast.show(\'You already have access to free features.\',\'info\')':'go(\'#/signup\')')+'">'+(u?'Included':'Start Free')+'</button>'
+     :'<button class="btn '+(popular?'btn-primary':'btn-secondary')+' btn-block" onclick="openCheckout(\''+k+'\')">Upgrade to '+p.name+'</button>')
+   +'</div>';
+ }).join('')+'</div>'
+ +'<p class="muted" style="text-align:center;font-size:12.5px;margin-top:28px">Market intelligence for informational purposes only. No profit guarantees. Demo payments are simulated.</p>';
+ if(u){ dashShell('pricing',content,u); }
+ else{ document.getElementById('app').innerHTML=publicNav()+'<div class="container" style="padding:120px 24px 60px">'+content+'</div>'+footerHTML(); attachNavScroll(); }
+}
+function openCheckout(plan){
+ const u=Auth.current();
+ if(!u){ Toast.show('Please log in to upgrade.','info'); go('#/login'); return; }
+ checkout={plan,coupon:null};
+ renderCheckout();
+}
+function checkoutTotal(){
+ const p=PLANS[checkout.plan], base=billYearly?p.yr:p.mo;
+ const disc=checkout.coupon?Math.round(base*checkout.coupon.value/100):0;
+ return {base,disc,total:base-disc};
+}
+function renderCheckout(){
+ const u=Auth.current(), p=PLANS[checkout.plan], t=checkoutTotal();
+ Modal.open('<div class="flex between" style="margin-bottom:18px"><b style="font-size:18px">Checkout — '+p.name+' <span class="pill pill-gray">Demo</span></b><button class="icon-btn" aria-label="Close" onclick="Modal.close()">'+I('x',18)+'</button></div>'
+ +'<div class="field"><label class="lbl">Name</label><input class="input" id="coName" value="'+esc(u.name)+'"></div>'
+ +'<div class="field"><label class="lbl">Email</label><input class="input" id="coEmail" value="'+esc(u.email)+'"></div>'
+ +'<div class="field"><label class="lbl">Payment method</label><select class="input"><option>UPI (demo)</option><option>Card (demo)</option><option>Netbanking (demo)</option></select></div>'
+ +'<div class="field"><label class="lbl">Coupon code</label><div class="flex" style="gap:8px"><input class="input" id="coCoupon" placeholder="e.g. DETWAL10" value="'+(checkout.coupon?checkout.coupon.code:'')+'" style="text-transform:uppercase"><button class="btn btn-secondary btn-sm" style="min-height:44px" onclick="applyCoupon()">Apply</button></div><div id="couponMsg" style="font-size:12.5px;margin-top:6px">'+(checkout.coupon?'<span class="pos">✓ '+checkout.coupon.code+' applied — '+checkout.coupon.value+'% off</span>':'')+'</div></div>'
+ +'<div style="background:var(--bg2);border:1px solid var(--border);border-radius:13px;padding:16px;margin-bottom:18px">'
+   +'<div class="flex between" style="font-size:14px;margin-bottom:7px"><span class="sub">'+p.name+' · '+(billYearly?'Yearly':'Monthly')+'</span><span class="mono">₹'+t.base.toLocaleString('en-IN')+'</span></div>'
+   +(t.disc?'<div class="flex between" style="font-size:14px;margin-bottom:7px"><span class="pos">Coupon discount</span><span class="mono pos">−₹'+t.disc.toLocaleString('en-IN')+'</span></div>':'')
+   +'<div class="flex between" style="font-weight:800;font-size:16px;border-top:1px solid var(--border);padding-top:10px;margin-top:4px"><span>Total</span><span class="mono" style="color:var(--bright)">₹'+t.total.toLocaleString('en-IN')+'</span></div></div>'
+ +'<button class="btn btn-primary btn-block" onclick="payDemo()">Continue to Payment</button>'
+ +'<p class="muted" style="font-size:11.5px;text-align:center;margin-top:12px">Demo checkout. No real charge. Razorpay integration connects here later.</p>');
+}
+function applyCoupon(){
+ const code=document.getElementById('coCoupon').value.trim().toUpperCase();
+ const msg=document.getElementById('couponMsg');
+ const c=coupons.find(x=>x.code===code&&x.status==='active');
+ if(!code){ msg.innerHTML='<span class="warn">Enter a coupon code.</span>'; return; }
+ if(!c){ checkout.coupon=null; msg.innerHTML='<span class="neg">✕ Invalid or expired coupon.</span>'; Toast.show('Invalid coupon code.','error'); return; }
+ checkout.coupon=c; Toast.show('Coupon applied — '+c.value+'% off!');
+ renderCheckout();
+}
+function payDemo(){
+ const t=checkoutTotal(), plan=checkout.plan;
+ Modal.open('<div style="text-align:center;padding:14px 4px"><div class="pulse" style="width:52px;height:52px;border-radius:50%;border:3px solid rgba(0,217,165,.3);border-top-color:var(--bright);margin:0 auto 18px;animation:spin 0.8s linear infinite"></div><b>Processing demo payment…</b><style>@keyframes spin{to{transform:rotate(360deg)}}</style></div>');
+ setTimeout(()=>{
+   Auth.updatePlan(plan);
+   DB.set('subscription',{plan,status:'active',start:new Date().toISOString().slice(0,10),amount:t.total,billing:billYearly?'yearly':'monthly'});
+   Modal.open('<div style="text-align:center;padding:10px 4px"><div style="width:62px;height:62px;border-radius:50%;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.4);color:var(--pos);display:flex;align-items:center;justify-content:center;margin:0 auto 18px" class="a-scale">'+I('check',30)+'</div>'
+   +'<h3 style="font-size:20px;margin-bottom:8px">Demo payment successful</h3><p class="sub" style="font-size:14px;margin-bottom:6px">Your <b style="color:var(--bright)">'+PLANS[plan].name+'</b> plan is now active.</p><p class="muted" style="font-size:12px;margin-bottom:22px">Amount: ₹'+t.total.toLocaleString('en-IN')+' · Simulated transaction</p>'
+   +'<button class="btn btn-primary btn-block" onclick="Modal.close();go(\'#/dashboard\')">Go to Dashboard</button></div>');
+   Toast.show('Demo payment successful.');
+ },1400);
+}
+
+/* ================================================================
+   PAGE: PROFILE
+================================================================ */
+function Profile(){
+ const u=requireAuth(); if(!u) return;
+ const sub=DB.get('subscription',{plan:u.plan,status:'active',start:u.joined,amount:u.plan==='PRO'?999:0,billing:'monthly'});
+ const content =
+ '<h1 class="a-up" style="font-size:24px;font-weight:800;margin-bottom:22px">Profile</h1>'
+ +'<div class="g2">'
+ +'<div class="card a-up d1"><div class="flex" style="gap:18px;margin-bottom:22px"><div style="width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,#26A69A,#00D9A5);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:26px;color:#031612">'+esc(u.name[0].toUpperCase())+'</div>'
+ +'<div><div style="font-weight:800;font-size:19px">'+esc(u.name)+'</div><div class="sub" style="font-size:14px">'+esc(u.email)+'</div><div class="flex" style="gap:8px;margin-top:7px"><span class="pill '+(u.role==='admin'?'pill-high':'pill-green')+'">'+(u.role==='admin'?'SUPER ADMIN':u.plan+' PLAN')+'</span><span class="pill pill-green">ACTIVE</span></div></div></div>'
+ +'<div style="display:grid;gap:11px;margin-bottom:22px">'+[['Member since',u.joined],['Account status','Active'],['Role',u.role],['Events viewed','47 (demo)'],['Favorites',favorites.length+' saved']].map(r=>'<div class="flex between" style="padding:11px 0;border-bottom:1px solid var(--border);font-size:14px"><span class="muted">'+r[0]+'</span><span style="font-weight:600">'+r[1]+'</span></div>').join('')+'</div>'
+ +'<div class="flex" style="gap:10px;flex-wrap:wrap"><button class="btn btn-secondary btn-sm" onclick="editProfileModal()">'+I('edit',15)+' Edit profile</button><button class="btn btn-secondary btn-sm" onclick="Toast.show(\'Demo: password change email sent.\',\'info\')">Change password</button><button class="btn btn-danger btn-sm" onclick="doLogout()">'+I('logout',15)+' Logout</button></div></div>'
+ +'<div class="card a-up d2"><div style="font-weight:700;font-size:16px;margin-bottom:18px">Subscription</div>'
+ +'<div style="background:var(--bg2);border:1px solid rgba(0,217,165,.25);border-radius:13px;padding:18px;margin-bottom:18px"><div class="flex between"><div><div style="font-weight:800;font-size:17px;color:var(--bright)">'+sub.plan+'</div><div class="muted" style="font-size:12.5px;margin-top:3px">'+sub.billing+' billing · started '+sub.start+'</div></div><span class="pill pill-green">'+sub.status.toUpperCase()+'</span></div></div>'
+ +'<div style="display:grid;gap:11px;margin-bottom:20px">'+[['Next renewal','2026-11-03 (demo)'],['Amount','₹'+(+sub.amount).toLocaleString('en-IN')],['Payment method','UPI (demo)'],['Invoices','3 available (demo)']].map(r=>'<div class="flex between" style="padding:11px 0;border-bottom:1px solid var(--border);font-size:14px"><span class="muted">'+r[0]+'</span><span style="font-weight:600">'+r[1]+'</span></div>').join('')+'</div>'
+ +'<div class="flex" style="gap:10px;flex-wrap:wrap"><a href="#/pricing" class="btn btn-primary btn-sm">Manage subscription</a><button class="btn btn-ghost btn-sm" onclick="Toast.show(\'Demo: cancellation flow would start here.\',\'info\')">Cancel plan</button></div></div>'
+ +'</div>';
+ dashShell('profile',content,u);
+}
+function editProfileModal(){
+ const u=Auth.current();
+ Modal.open('<div class="flex between" style="margin-bottom:18px"><b style="font-size:18px">Edit profile</b><button class="icon-btn" aria-label="Close" onclick="Modal.close()">'+I('x',18)+'</button></div>'
+ +'<div class="field"><label class="lbl">Full name</label><input class="input" id="epName" value="'+esc(u.name)+'"></div>'
+ +'<div class="field"><label class="lbl">Email</label><input class="input" value="'+esc(u.email)+'" disabled style="opacity:.55"></div>'
+ +'<button class="btn btn-primary btn-block" onclick="saveProfile()">Save changes</button>');
+}
+function saveProfile(){
+ const n=document.getElementById('epName').value.trim();
+ if(!n) return Toast.show('Name cannot be empty.','error');
+ Auth.updateName(n); Modal.close(); Toast.show('Profile updated.'); render();
+}
+
+/* ================================================================
+   PAGE: SETTINGS
+================================================================ */
+function SettingsPage(){
+ const u=requireAuth(); if(!u) return;
+ const togg=(key,label,sub)=>'<div class="flex between" style="padding:15px 0;border-bottom:1px solid var(--border)"><div><div style="font-weight:600;font-size:14.5px">'+label+'</div><div class="muted" style="font-size:12.5px">'+sub+'</div></div><button class="toggle'+(settings[key]?' on':'')+'" aria-label="'+label+'" onclick="toggleSetting(\''+key+'\',this)"></button></div>';
+ const content =
+ '<h1 class="a-up" style="font-size:24px;font-weight:800;margin-bottom:22px">Settings</h1>'
+ +'<div class="g2">'
+ +'<div class="card a-up d1"><div style="font-weight:700;font-size:16px;margin-bottom:6px">Notifications</div>'
+ +togg('notifications','Push notifications','In-app alerts and updates')
+ +togg('emailAlerts','Email alerts','Important account and billing emails')
+ +togg('newsAlerts','News alerts','High-impact event reminders')
+ +togg('marketAlerts','Market alerts','Price movement notifications')
+ +'</div>'
+ +'<div style="display:grid;gap:18px;align-content:start">'
+ +'<div class="card a-up d2"><div style="font-weight:700;font-size:16px;margin-bottom:14px">Preferences</div>'
+  +'<div class="field"><label class="lbl">Timezone</label><select class="input" onchange="settings.timezone=this.value;saveSettings();Toast.show(\'Timezone updated.\')">'+['Asia/Kolkata (IST)','UTC','America/New_York (EST)','Europe/London (GMT)'].map(t=>'<option'+(settings.timezone===t?' selected':'')+'>'+t+'</option>').join('')+'</select></div>'
+  +'<div class="field"><label class="lbl">Theme</label><select class="input" onchange="settings.theme=this.value;saveSettings();Toast.show(this.value===\'Dark\'?\'Theme saved.\':\'Light theme is on the roadmap — staying dark for demo.\',\'info\')"><option'+(settings.theme==='Dark'?' selected':'')+'>Dark</option><option'+(settings.theme==='Light'?' selected':'')+'>Light (coming soon)</option></select></div>'
+  +'<div class="field" style="margin-bottom:0"><label class="lbl">Language</label><select class="input"><option>English</option><option>हिन्दी (soon)</option></select></div></div>'
+ +'<div class="card a-up d3"><div style="font-weight:700;font-size:16px;margin-bottom:14px">Security</div>'
+  +'<div style="display:grid;gap:10px"><button class="btn btn-secondary btn-sm" onclick="Toast.show(\'Demo: 2FA setup would start here.\',\'info\')">'+I('shield',15)+' Enable two-factor auth</button>'
+  +'<button class="btn btn-secondary btn-sm" onclick="Toast.show(\'Demo: password reset email sent.\',\'info\')">Change password</button>'
+  +'<button class="btn btn-danger btn-sm" onclick="confirmModal(\'Sign out all sessions?\',\'This will log you out of all devices (demo).\',()=>{Toast.show(\'All sessions cleared (demo).\',\'info\');})">Sign out all sessions</button></div>'
+  +'<div class="glass" style="padding:12px;border-radius:11px;margin-top:14px"><div style="font-size:12.5px;color:var(--sub)"><b style="color:#fff">Active session</b><br>Chrome · Mumbai, IN · This device</div></div></div>'
+ +'</div></div>';
+ dashShell('settings',content,u);
+}
+function toggleSetting(k,btn){
+ settings[k]=!settings[k]; saveSettings();
+ btn.classList.toggle('on',settings[k]);
+ Toast.show('Setting saved.','info');
+}
+function confirmModal(title,body,onYes){
+ window.__confirmCb=onYes;
+ Modal.open('<div style="text-align:center;padding:6px"><div style="width:52px;height:52px;border-radius:50%;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);color:var(--neg);display:flex;align-items:center;justify-content:center;margin:0 auto 16px">'+I('alert',24)+'</div>'
+ +'<h3 style="font-size:18px;margin-bottom:8px">'+esc(title)+'</h3><p class="sub" style="font-size:14px;margin-bottom:22px">'+esc(body)+'</p>'
+ +'<div class="flex" style="gap:10px"><button class="btn btn-secondary btn-block" onclick="Modal.close()">Cancel</button><button class="btn btn-danger btn-block" onclick="Modal.close();window.__confirmCb&&window.__confirmCb()">Confirm</button></div></div>');
+}
+
+/* ================================================================
+   PAGE: SUPPORT
+================================================================ */
+function Support(){
+ const u=requireAuth(); if(!u) return;
+ const faqs=[['How do I upgrade my plan?','Go to Pricing, choose a plan, and complete the demo checkout. Your plan updates instantly in this demo.'],
+ ['Why is data labeled “demo”?','This build uses simulated market and model data for presentation. Live integrations connect in production.'],
+ ['How do countdowns work?','Each event has a scheduled release time; countdowns update every second and show RELEASED at zero.'],
+ ['Is DETWAL financial advice?','No — DETWAL provides informational tools only. You make your own trading decisions.']];
+ const content =
+ '<h1 class="a-up" style="font-size:24px;font-weight:800;margin-bottom:22px">Support</h1>'
+ +'<div class="g2">'
+ +'<div class="card a-up d1"><div style="font-weight:700;font-size:16px;margin-bottom:10px">Frequently asked</div>'
+ +faqs.map(f=>'<div class="faq-item"><button class="faq-q" style="font-size:14.5px;padding:15px 0" onclick="this.parentElement.classList.toggle(\'open\')">'+f[0]+'<span class="muted">'+I('chevD',16)+'</span></button><div class="faq-a" style="font-size:13.5px">'+f[1]+'</div></div>').join('')
+ +'<div class="glass" style="padding:14px;border-radius:12px;margin-top:18px"><div class="flex" style="gap:10px"><span style="color:var(--bright)">'+I('mail',17)+'</span><div style="font-size:13px" class="sub">Email us anytime at <b style="color:#fff">support@detwal.in</b> (demo)</div></div></div></div>'
+ +'<div class="card a-up d2"><div style="font-weight:700;font-size:16px;margin-bottom:16px">Submit a ticket</div>'
+ +'<div class="field"><label class="lbl">Subject</label><input class="input" id="tkSub" placeholder="Brief summary"></div>'
+ +'<div class="field"><label class="lbl">Category</label><select class="input" id="tkCat"><option>General</option><option>Billing</option><option>Technical issue</option><option>Feature request</option><option>Account</option></select></div>'
+ +'<div class="field"><label class="lbl">Message</label><textarea class="input" id="tkMsg" rows="5" placeholder="Describe your issue…"></textarea></div>'
+ +'<button class="btn btn-primary btn-block" onclick="submitTicket()">Submit ticket</button>'
+ +(tickets.length?'<div style="margin-top:20px"><div class="muted" style="font-size:12px;font-weight:700;letter-spacing:.07em;margin-bottom:10px">YOUR TICKETS</div>'+tickets.slice(-3).reverse().map(t=>'<div class="flex between" style="padding:11px 0;border-bottom:1px solid var(--border);font-size:13.5px"><div><b>'+esc(t.subject)+'</b><div class="muted" style="font-size:11.5px">'+t.cat+' · '+t.date+'</div></div><span class="pill pill-med">OPEN</span></div>').join('')+'</div>':'')
+ +'</div></div>';
+ dashShell('support',content,u);
+}
+function submitTicket(){
+ const s=document.getElementById('tkSub').value.trim(),m=document.getElementById('tkMsg').value.trim();
+ if(!s||!m) return Toast.show('Please fill subject and message.','error');
+ tickets.push({subject:s,cat:document.getElementById('tkCat').value,msg:m,date:new Date().toLocaleDateString()});
+ saveTickets(); Toast.show('Ticket submitted. We\u2019ll get back to you!'); render();
+}
+
+/* ================================================================
+   ADMIN
+================================================================ */
+function AdminPage(tab){
+ const u=requireAuth(); if(!u) return;
+ if(u.role!=='admin'){
+   dashShell('admin','<div class="card empty a-up" style="max-width:480px;margin:60px auto"><div style="color:var(--neg);margin-bottom:14px">'+I('shield',40)+'</div><h2 style="color:#fff;font-size:20px">Unauthorized</h2><p style="font-size:14px;margin:10px 0 20px">Your account does not have admin access.</p><button class="btn btn-primary" onclick="go(\'#/dashboard\')">Go Dashboard</button></div>',u);
+   return;
+ }
+ const tabs=[['overview','Overview','#/admin'],['users','Users','#/admin/users'],['news','News','#/admin/news'],['subscriptions','Subscriptions','#/admin/subscriptions'],['coupons','Coupons','#/admin/coupons'],['activity','Activity','#/admin/activity'],['settings','Settings','#/admin/settings']];
+ let body='';
+ if(tab==='overview') body=adminOverview();
+ if(tab==='users') body=adminUsers();
+ if(tab==='news') body=adminNews();
+ if(tab==='subscriptions') body=adminSubs();
+ if(tab==='coupons') body=adminCoupons();
+ if(tab==='activity') body=adminActivity();
+ if(tab==='settings') body=adminSettings();
+ const content='<div class="flex between a-up" style="flex-wrap:wrap;gap:12px;margin-bottom:18px"><div><h1 style="font-size:24px;font-weight:800">Admin Panel</h1><p class="sub" style="font-size:14px">Internal management console · <span class="pill pill-high">SUPER ADMIN</span></p></div><span class="pill pill-gray">All data simulated</span></div>'
+ +'<div class="flex a-up d1" style="gap:8px;flex-wrap:wrap;margin-bottom:22px">'+tabs.map(t=>'<a class="tab-btn'+(tab===t[0]?' active':'')+'" href="'+t[2]+'">'+t[1]+'</a>').join('')+'</div>'+body;
+ dashShell('admin',content,u);
+ if(tab==='overview') initAdminCharts();
+ startTicker();
+}
+function adminOverview(){
+ const stats=[['Total Users','2,847','+12% this month','user'],['Active Subscribers','1,214','+8% this month','card'],['Revenue (MTD)','₹4.2L','Demo figure','chart'],['Upcoming Events',String(news.filter(n=>n.ts>Date.now()).length),'Next: '+((nextEvent()||{}).title||'—'),'calendar'],['Demo Signals','36','This week','zap'],['Open Tickets',String(Math.max(tickets.length,3)),'2 urgent (demo)','help']];
+ return '<div class="g3 a-up d2" style="margin-bottom:18px">'+stats.map(s=>'<div class="card card-hover"><div class="flex between"><div><div class="muted" style="font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase">'+s[0]+'</div><div class="stat-num" style="margin-top:6px">'+s[1]+'</div><div class="muted" style="font-size:12px;margin-top:3px">'+s[2]+'</div></div><div class="feature-ico" style="margin:0;width:40px;height:40px">'+I(s[3],18)+'</div></div></div>').join('')+'</div>'
+ +'<div class="g2 a-up d3"><div class="card"><div style="font-weight:700;margin-bottom:14px">User growth <span class="pill pill-gray">Demo</span></div><div style="height:220px"><canvas id="adUsers"></canvas></div></div>'
+ +'<div class="card"><div style="font-weight:700;margin-bottom:14px">Revenue <span class="pill pill-gray">Demo</span></div><div style="height:220px"><canvas id="adRev"></canvas></div></div></div>';
+}
+function initAdminCharts(){
+ if(typeof Chart==='undefined') return;
+ const months=['May','Jun','Jul','Aug','Sep','Oct'];
+ const c1=document.getElementById('adUsers'),c2=document.getElementById('adRev');
+ if(c1) charts.push(new Chart(c1,{type:'line',data:{labels:months,datasets:[{data:[820,1240,1610,2050,2480,2847],borderColor:'#00D9A5',backgroundColor:'rgba(0,217,165,.08)',fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'#00D9A5'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#71717A'}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#71717A'}}}}}));
+ if(c2) charts.push(new Chart(c2,{type:'bar',data:{labels:months,datasets:[{data:[1.1,1.8,2.4,3.1,3.8,4.2],backgroundColor:'rgba(0,217,165,.5)',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'₹'+c.parsed.y+'L'}}},scales:{x:{grid:{display:false},ticks:{color:'#71717A'}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#71717A',callback:v=>'₹'+v+'L'}}}}}));
+}
+function adminUsers(){
+ return '<div class="card a-up d2" style="padding:0;overflow:hidden"><div class="flex between" style="padding:18px 22px"><b>Users ('+users.length+')</b><button class="btn btn-primary btn-sm" onclick="Toast.show(\'Demo: invite email would be sent.\',\'info\')">'+I('plus',14)+' Invite user</button></div>'
+ +'<div class="table-wrap" style="border:none;border-top:1px solid var(--border);border-radius:0"><table><thead><tr><th>Name</th><th>Email</th><th>Plan</th><th>Status</th><th>Joined</th><th>Last Active</th><th>Actions</th></tr></thead><tbody>'
+ +users.map(x=>'<tr><td style="font-weight:600">'+esc(x.name)+'</td><td class="sub">'+esc(x.email)+'</td><td><span class="pill '+(x.plan==='ADMIN'?'pill-high':x.plan==='FREE'?'pill-gray':'pill-green')+'">'+x.plan+'</span></td>'
+ +'<td><span class="pill '+(x.status==='active'?'pill-green':'pill-med')+'">'+x.status.toUpperCase()+'</span></td><td class="sub">'+x.joined+'</td><td class="sub">'+x.last+'</td>'
+ +'<td><div class="flex" style="gap:4px"><button class="icon-btn" style="width:32px;height:32px" title="View" aria-label="View" onclick="Toast.show(\'Viewing '+esc(x.name)+' (demo).\',\'info\')">'+I('eye',14)+'</button>'
+ +'<button class="icon-btn" style="width:32px;height:32px" title="Suspend" aria-label="Suspend" onclick="confirmModal(\''+(x.status==='active'?'Suspend':'Reactivate')+' '+esc(x.name)+'?\',\'This updates the demo user state.\',()=>adminToggleUser(\''+x.id+'\'))">'+I('shield',14)+'</button>'
+ +'<button class="icon-btn" style="width:32px;height:32px;color:var(--neg)" title="Delete" aria-label="Delete" onclick="confirmModal(\'Delete '+esc(x.name)+'?\',\'This permanently removes the demo user.\',()=>adminDeleteUser(\''+x.id+'\'))">'+I('trash',14)+'</button></div></td></tr>').join('')
+ +'</tbody></table></div></div>';
+}
+function adminToggleUser(id){ const x=users.find(u=>u.id===id); if(x){x.status=x.status==='active'?'suspended':'active';saveUsers();Toast.show('User '+x.status+'.');render();} }
+function adminDeleteUser(id){ users=users.filter(u=>u.id!==id); saveUsers(); Toast.show('User deleted.','info'); render(); }
+function adminNews(){
+ return '<div class="card a-up d2" style="padding:0;overflow:hidden"><div class="flex between" style="padding:18px 22px"><b>News Events ('+news.length+')</b><button class="btn btn-primary btn-sm" onclick="newsForm()">'+I('plus',14)+' Create event</button></div>'
+ +'<div class="table-wrap" style="border:none;border-top:1px solid var(--border);border-radius:0"><table><thead><tr><th>Event</th><th>Impact</th><th>Ccy</th><th>Prev</th><th>Fcst</th><th>Actual</th><th>Bull/Bear</th><th>Time</th><th>Actions</th></tr></thead><tbody>'
+ +news.slice().sort((a,b)=>a.ts-b.ts).map(n=>'<tr><td style="font-weight:600">'+esc(n.title)+'</td><td>'+impactPill(n.impact)+'</td><td>'+n.currency+'</td><td class="mono sub">'+n.previous+'</td><td class="mono sub">'+n.forecast+'</td><td class="mono">'+(n.actual||'—')+'</td><td class="mono"><span class="pos">'+n.bull+'</span>/<span class="neg">'+n.bear+'</span></td><td class="sub">'+new Date(n.ts).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})+'</td>'
+ +'<td><div class="flex" style="gap:4px"><button class="icon-btn" style="width:32px;height:32px" title="Edit" aria-label="Edit" onclick="newsForm(\''+n.id+'\')">'+I('edit',14)+'</button>'
+ +'<button class="icon-btn" style="width:32px;height:32px;color:var(--neg)" title="Delete" aria-label="Delete" onclick="confirmModal(\'Delete event?\',\''+esc(n.title)+' will be removed from the demo calendar.\',()=>adminDeleteNews(\''+n.id+'\'))">'+I('trash',14)+'</button></div></td></tr>').join('')
+ +'</tbody></table></div></div>';
+}
+function newsForm(id){
+ const n=id?news.find(x=>x.id===id):{title:'',impact:'HIGH',currency:'USD',country:'US',previous:'',forecast:'',actual:'',bull:50,bear:40,neutral:10,ts:Date.now()+86400000,markets:['XAUUSD'],desc:'',hist:''};
+ window.__editNewsId=id||null;
+ const dt=new Date(n.ts-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16);
+ Modal.open('<div class="flex between" style="margin-bottom:18px"><b style="font-size:18px">'+(id?'Edit':'Create')+' event</b><button class="icon-btn" aria-label="Close" onclick="Modal.close()">'+I('x',18)+'</button></div>'
+ +'<div class="field"><label class="lbl">Title</label><input class="input" id="nfTitle" value="'+esc(n.title)+'"></div>'
+ +'<div class="g2" style="gap:12px"><div class="field"><label class="lbl">Impact</label><select class="input" id="nfImpact">'+['HIGH','MEDIUM','LOW'].map(x=>'<option'+(n.impact===x?' selected':'')+'>'+x+'</option>').join('')+'</select></div>'
+ +'<div class="field"><label class="lbl">Currency</label><select class="input" id="nfCcy">'+['USD','EUR','GBP','JPY'].map(x=>'<option'+(n.currency===x?' selected':'')+'>'+x+'</option>').join('')+'</select></div></div>'
+ +'<div class="g3" style="gap:12px"><div class="field"><label class="lbl">Previous</label><input class="input" id="nfPrev" value="'+esc(n.previous)+'"></div><div class="field"><label class="lbl">Forecast</label><input class="input" id="nfFcst" value="'+esc(n.forecast)+'"></div><div class="field"><label class="lbl">Actual</label><input class="input" id="nfAct" value="'+esc(n.actual||'')+'" placeholder="—"></div></div>'
+ +'<div class="field"><label class="lbl">Release time</label><input class="input" id="nfTime" type="datetime-local" value="'+dt+'"></div>'
+ +'<div class="g3" style="gap:12px"><div class="field"><label class="lbl">Bull %</label><input class="input" id="nfBull" type="number" value="'+n.bull+'"></div><div class="field"><label class="lbl">Bear %</label><input class="input" id="nfBear" type="number" value="'+n.bear+'"></div><div class="field"><label class="lbl">Neutral %</label><input class="input" id="nfNeu" type="number" value="'+n.neutral+'"></div></div>'
+ +'<div class="field"><label class="lbl">Affected markets (comma separated)</label><input class="input" id="nfMkts" value="'+n.markets.join(', ')+'"></div>'
+ +'<button class="btn btn-primary btn-block" onclick="saveNewsForm()">'+(id?'Save changes':'Create event')+'</button>');
+}
+function saveNewsForm(){
+ const g=i=>document.getElementById(i).value;
+ const title=g('nfTitle').trim(); if(!title) return Toast.show('Title required.','error');
+ const obj={title,impact:g('nfImpact'),currency:g('nfCcy'),country:'US',previous:g('nfPrev')||'—',forecast:g('nfFcst')||'—',actual:g('nfAct')||null,
+   ts:new Date(g('nfTime')).getTime()||Date.now()+86400000,bull:+g('nfBull')||0,bear:+g('nfBear')||0,neutral:+g('nfNeu')||0,
+   markets:g('nfMkts').split(',').map(s=>s.trim()).filter(Boolean),
+   desc:'Admin-created demo event.',hist:'No historical observations recorded yet. Demo context only.'};
+ if(window.__editNewsId){ Object.assign(news.find(x=>x.id===window.__editNewsId),obj); Toast.show('Event updated.'); }
+ else{ obj.id='ev'+Date.now(); news.push(obj); Toast.show('Event created.'); }
+ saveNews(); Modal.close(); render();
+}
+function adminDeleteNews(id){ news=news.filter(n=>n.id!==id); saveNews(); Toast.show('Event deleted.','info'); render(); }
+function adminSubs(){
+ const subs=[['Daksh','PRO','active','2026-06-14','2026-11-14','₹999','PAID'],['Arjun Mehta','PREMIUM','active','2026-07-21','2026-10-21','₹1,999','PAID'],['Sara Iyer','PRO','active','2026-08-03','2026-11-03','₹999','PAID'],['Mia Fernandes','PRO','active','2026-09-11','2026-10-11','₹999','PENDING'],['Rohan Kapoor','FREE','cancelled','2026-08-29','—','₹0','—']];
+ return '<div class="card a-up d2" style="padding:0;overflow:hidden"><div style="padding:18px 22px"><b>Subscriptions</b> <span class="pill pill-gray" style="margin-left:6px">Demo</span></div>'
+ +'<div class="table-wrap" style="border:none;border-top:1px solid var(--border);border-radius:0"><table><thead><tr><th>User</th><th>Plan</th><th>Status</th><th>Start</th><th>Expiry</th><th>Amount</th><th>Payment</th><th></th></tr></thead><tbody>'
+ +subs.map(s=>'<tr><td style="font-weight:600">'+s[0]+'</td><td><span class="pill '+(s[1]==='FREE'?'pill-gray':'pill-green')+'">'+s[1]+'</span></td><td><span class="pill '+(s[2]==='active'?'pill-green':'pill-med')+'">'+s[2].toUpperCase()+'</span></td><td class="sub">'+s[3]+'</td><td class="sub">'+s[4]+'</td><td class="mono">'+s[5]+'</td><td><span class="pill '+(s[6]==='PAID'?'pill-green':s[6]==='PENDING'?'pill-med':'pill-gray')+'">'+s[6]+'</span></td>'
+ +'<td><button class="btn btn-ghost btn-sm" onclick="Toast.show(\'Demo: subscription detail view.\',\'info\')">View</button></td></tr>').join('')+'</tbody></table></div></div>';
+}
+function adminCoupons(){
+ return '<div class="card a-up d2" style="padding:0;overflow:hidden"><div class="flex between" style="padding:18px 22px"><b>Coupons ('+coupons.length+')</b><button class="btn btn-primary btn-sm" onclick="couponForm()">'+I('plus',14)+' Create coupon</button></div>'
+ +'<div class="table-wrap" style="border:none;border-top:1px solid var(--border);border-radius:0"><table><thead><tr><th>Code</th><th>Discount</th><th>Expiry</th><th>Usage limit</th><th>Status</th><th>Actions</th></tr></thead><tbody>'
+ +coupons.map((c,i)=>'<tr><td><span class="pill pill-green mono">'+esc(c.code)+'</span></td><td class="mono">'+c.value+'%</td><td class="sub">'+c.expiry+'</td><td class="sub">'+c.limit+'</td><td><span class="pill '+(c.status==='active'?'pill-green':'pill-gray')+'">'+c.status.toUpperCase()+'</span></td>'
+ +'<td><div class="flex" style="gap:4px"><button class="icon-btn" style="width:32px;height:32px" aria-label="Edit" onclick="couponForm('+i+')">'+I('edit',14)+'</button><button class="icon-btn" style="width:32px;height:32px;color:var(--neg)" aria-label="Delete" onclick="confirmModal(\'Delete coupon '+esc(c.code)+'?\',\'This removes the demo coupon.\',()=>adminDeleteCoupon('+i+'))">'+I('trash',14)+'</button></div></td></tr>').join('')
+ +'</tbody></table></div></div>';
+}
+function couponForm(idx){
+ const c=idx!=null?coupons[idx]:{code:'',type:'percent',value:10,expiry:'2026-12-31',limit:100,status:'active'};
+ window.__editCoupon=idx!=null?idx:null;
+ Modal.open('<div class="flex between" style="margin-bottom:18px"><b style="font-size:18px">'+(idx!=null?'Edit':'Create')+' coupon</b><button class="icon-btn" aria-label="Close" onclick="Modal.close()">'+I('x',18)+'</button></div>'
+ +'<div class="field"><label class="lbl">Code</label><input class="input" id="cpCode" value="'+esc(c.code)+'" style="text-transform:uppercase"></div>'
+ +'<div class="g2" style="gap:12px"><div class="field"><label class="lbl">Discount %</label><input class="input" id="cpVal" type="number" value="'+c.value+'"></div><div class="field"><label class="lbl">Usage limit</label><input class="input" id="cpLim" type="number" value="'+c.limit+'"></div></div>'
+ +'<div class="g2" style="gap:12px"><div class="field"><label class="lbl">Expiry</label><input class="input" id="cpExp" type="date" value="'+c.expiry+'"></div><div class="field"><label class="lbl">Status</label><select class="input" id="cpSt"><option'+(c.status==='active'?' selected':'')+'>active</option><option'+(c.status==='disabled'?' selected':'')+'>disabled</option></select></div></div>'
+ +'<button class="btn btn-primary btn-block" onclick="saveCouponForm()">'+(idx!=null?'Save':'Create')+'</button>');
+}
+function saveCouponForm(){
+ const code=document.getElementById('cpCode').value.trim().toUpperCase();
+ if(!code) return Toast.show('Code required.','error');
+ const obj={code,type:'percent',value:+document.getElementById('cpVal').value||0,limit:+document.getElementById('cpLim').value||0,expiry:document.getElementById('cpExp').value,status:document.getElementById('cpSt').value};
+ if(window.__editCoupon!=null) coupons[window.__editCoupon]=obj; else coupons.push(obj);
+ saveCoupons(); Modal.close(); Toast.show('Coupon saved.'); render();
+}
+function adminDeleteCoupon(i){ coupons.splice(i,1); saveCoupons(); Toast.show('Coupon deleted.','info'); render(); }
+function adminActivity(){
+ const acts=[['Admin updated NFP forecast','8 min ago','edit'],['New user signup: mia.f@example.com','2h ago','user'],['Payment received — ₹999 (demo)','3h ago','card'],['Coupon PRO20 applied at checkout','5h ago','tag'],['Event created: ISM Services PMI','Yesterday','plus'],['User suspended: rohan.k@example.com','2d ago','shield']];
+ return '<div class="card a-up d2"><b style="display:block;margin-bottom:14px">Platform activity <span class="pill pill-gray">Demo</span></b><div style="display:grid;gap:4px">'
+ +acts.map(a=>'<div class="flex" style="gap:13px;padding:13px 6px;border-bottom:1px solid var(--border)"><span style="color:var(--bright)">'+I(a[2],16)+'</span><div><div style="font-size:14px;font-weight:500">'+a[0]+'</div><div class="muted" style="font-size:12px">'+a[1]+'</div></div></div>').join('')+'</div></div>';
+}
+function adminSettings(){
+ const health=[['News API','Not connected','pill-med'],['Payment gateway (Razorpay)','Not connected','pill-med'],['Email service','Not connected','pill-med'],['Database (Supabase)','Not connected','pill-med'],['Demo mode','Active','pill-green']];
+ return '<div class="g2 a-up d2"><div class="card"><b style="display:block;margin-bottom:16px">Platform settings</b>'
+ +'<div class="field"><label class="lbl">Site name</label><input class="input" value="DETWAL"></div>'
+ +'<div class="field"><label class="lbl">Logo text</label><input class="input" value="DETWAL"></div>'
+ +'<div class="field"><label class="lbl">Primary color</label><input class="input" value="#00D9A5"></div>'
+ +'<div class="flex between" style="padding:13px 0;border-bottom:1px solid var(--border)"><span style="font-size:14px;font-weight:600">Maintenance mode</span><button class="toggle" onclick="this.classList.toggle(\'on\');Toast.show(\'Demo setting toggled.\',\'info\')" aria-label="Maintenance mode"></button></div>'
+ +'<div class="flex between" style="padding:13px 0;border-bottom:1px solid var(--border)"><span style="font-size:14px;font-weight:600">Registration enabled</span><button class="toggle on" onclick="this.classList.toggle(\'on\');Toast.show(\'Demo setting toggled.\',\'info\')" aria-label="Registration"></button></div>'
+ +'<button class="btn btn-primary btn-block" style="margin-top:18px" onclick="Toast.show(\'Admin settings saved (demo).\')">Save settings</button></div>'
+ +'<div class="card"><b style="display:block;margin-bottom:16px">Service health</b><div style="display:grid;gap:10px">'
+ +health.map(h=>'<div class="flex between" style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px"><span style="font-size:14px;font-weight:600">'+h[0]+'</span><span class="pill '+h[2]+'">'+h[1].toUpperCase()+'</span></div>').join('')
+ +'</div><p class="muted" style="font-size:12px;margin-top:14px">Live integrations connect via backend services in production. Secrets are never stored in the frontend.</p></div></div>';
+}
+
+/* ================================================================
+   LEGAL + 404
+================================================================ */
+function LegalPage(title){
+ const body = title==='Disclaimer'
+  ?'DETWAL provides market information and analytical tools for informational purposes only. Nothing on this platform constitutes financial, investment, or trading advice. Model probabilities shown in this demo are simulated and clearly labeled as demo output. No accuracy or profit is guaranteed. Users are solely responsible for their own trading decisions and should consult a licensed financial advisor before trading.'
+  :title==='Privacy Policy'
+  ?'This demo stores preferences and session data locally in your browser (localStorage) only. No personal data is transmitted to any server in demo mode. In production, DETWAL will process account data in accordance with applicable data-protection law, and this policy will be expanded accordingly.'
+  :'By using DETWAL you agree to use the platform for lawful, informational purposes. Demo content is simulated and provided as-is without warranties. Subscriptions in the production product may be cancelled anytime; access continues until the end of the billing period. DETWAL is not liable for trading losses.';
+ document.getElementById('app').innerHTML=publicNav()
+ +'<div class="container" style="padding:130px 24px 80px;max-width:760px"><h1 class="a-up" style="font-size:30px;font-weight:800;margin-bottom:8px">'+title+'</h1><p class="muted a-up d1" style="font-size:13px;margin-bottom:26px">Last updated: October 2026 · Demo content</p><div class="card a-up d2"><p class="sub" style="font-size:15px;line-height:1.8">'+body+'</p></div></div>'+footerHTML();
+ attachNavScroll();
+}
+function NotFound(){
+ const u=Auth.current();
+ document.getElementById('app').innerHTML=
+ '<div class="auth-wrap"><div class="hero-glow"></div><div class="hero-grid"></div><div style="text-align:center;position:relative" class="a-up">'
+ +'<div class="logo" style="justify-content:center;margin-bottom:26px">DETWAL<span class="dot"></span></div>'
+ +'<div style="font-size:88px;font-weight:900;letter-spacing:-.03em;background:linear-gradient(180deg,#fff,rgba(255,255,255,.2));-webkit-background-clip:text;background-clip:text;color:transparent">404</div>'
+ +'<h2 style="font-size:20px;margin:6px 0 10px">Page not found.</h2><p class="sub" style="font-size:14px;margin-bottom:28px">The page you\u2019re looking for doesn\u2019t exist or was moved.</p>'
+ +'<div class="flex" style="gap:12px;justify-content:center;flex-wrap:wrap">'+(u?'<button class="btn btn-primary" onclick="go(\'#/dashboard\')">Back to dashboard</button>':'')+'<button class="btn btn-secondary" onclick="go(\'#/\')">Go home</button></div></div></div>';
+}
+
+/* ================================================================
+   COOKIE NOTICE + INIT
+================================================================ */
+(function(){
+ if(!DB.get('cookieOk',false)){
+   const el=document.createElement('div');
+   el.id='cookieBar';
+   el.style.cssText='position:fixed;bottom:18px;right:18px;z-index:260;max-width:340px;background:var(--card2);border:1px solid var(--border2);border-radius:14px;padding:16px;box-shadow:0 14px 50px rgba(0,0,0,.6);animation:fadeUp .4s .8s both';
+   el.innerHTML='<div style="font-size:13px;color:var(--sub);margin-bottom:12px"><b style="color:#fff">🍪 Privacy notice</b><br>This demo stores preferences locally in your browser only.</div><div class="flex" style="gap:8px"><button class="btn btn-primary btn-sm" onclick="DB.set(\'cookieOk\',true);document.getElementById(\'cookieBar\').remove()">Accept</button><button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'cookieBar\').remove()">Dismiss</button></div>';
+   document.body.appendChild(el);
+ }
+})();
+render();
+</script>
+</body>
+</html>
